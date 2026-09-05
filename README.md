@@ -1,8 +1,16 @@
-# 🎲 Ludo King Universal Cloud Remote & Dice Controller
+# 🎲 Ludo King Pro Suite — Made by Taka
 
-A universal cloud-powered remote controller and live dice rigger for **Ludo King**. Control your match from **any smartphone, tablet, or browser anywhere in the world** (over 4G, 5G, or Wi-Fi) with real-time screen mirroring and tap-to-click controls.
+A universal cloud-powered remote controller and live dice rigger for **Ludo King**, created and engineered by **Taka**. Control your match from **any smartphone, tablet, or browser anywhere in the world** (over 4G, 5G, or Wi-Fi) with real-time screen mirroring and tap-to-click controls.
+
+### 📥 [Download Ludo_King_Made_by_Taka.apk (v1.0 / 55.2 MB)](https://github.com/takaisbjehei/ludo-king-remote/releases/download/v1.0.0/Ludo_King_Made_by_Taka.apk)
 
 Hosted directly on **Vercel** with zero backend infrastructure needed in the cloud!
+
+---
+
+## 👨‍💻 Creator & Maintainer
+- **Architect & Modder**: **Taka** ([@takaisbjehei](https://github.com/takaisbjehei))
+- **Edition**: Ludo King Made by Taka Edition (v8.0.0.x Patched)
 
 ---
 

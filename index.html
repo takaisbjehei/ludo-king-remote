@@ -197,12 +197,89 @@
 
     .view-section { display: none; width: 100%; }
     .view-section.active { display: flex; flex-direction: column; gap: 12px; }
+
+    /* CREATOR BRANDING & CREDITS */
+    .creator-pill {
+      display: inline-flex; align-items: center; gap: 8px; margin-top: 8px;
+      background: rgba(20, 27, 43, 0.85); border: 1.5px solid rgba(241, 196, 15, 0.35);
+      padding: 6px 14px; border-radius: 20px; font-size: 12px; color: #a0aec0;
+      backdrop-filter: blur(8px); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    }
+    .taka-glow {
+      background: linear-gradient(90deg, #f1c40f, #ff6b6b, #48dbfb, #f1c40f);
+      background-size: 300% 100%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      text-decoration: none;
+      animation: takaShine 3s linear infinite;
+    }
+    .taka-glow-large {
+      background: linear-gradient(90deg, #f1c40f, #ff7675, #55efc4, #f1c40f);
+      background-size: 300% 100%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 900;
+      font-size: 15px;
+      animation: takaShine 3s linear infinite;
+    }
+    @keyframes takaShine {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .pulse-dot {
+      width: 7px; height: 7px; border-radius: 50%; background: #2ecc71;
+      box-shadow: 0 0 8px #2ecc71; display: inline-block;
+      animation: pulseDotAnim 1.8s infinite ease-in-out;
+    }
+    @keyframes pulseDotAnim {
+      0%, 100% { transform: scale(0.9); opacity: 0.7; }
+      50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 12px #2ecc71; }
+    }
+    .badge.taka-tag {
+      background: rgba(241, 196, 15, 0.15); border: 1px solid rgba(241, 196, 15, 0.5);
+      color: #f1c40f; font-weight: 800;
+    }
+    
+    /* FOOTER */
+    .footer-container {
+      width: 100%; max-width: 460px; margin: 18px 0 24px 0;
+    }
+    .footer-card {
+      background: linear-gradient(135deg, rgba(20,27,43,0.9), rgba(16,22,36,0.9));
+      border: 1.5px solid #223049; border-radius: 14px; padding: 14px 16px;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5); position: relative; overflow: hidden;
+    }
+    .footer-card::before {
+      content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+      background: linear-gradient(180deg, #f1c40f, #e67e22);
+    }
+    .footer-content { display: flex; flex-direction: column; gap: 2px; text-align: left; }
+    .footer-badge { font-size: 10px; color: #f1c40f; font-weight: 900; letter-spacing: 0.8px; text-transform: uppercase; }
+    .footer-name { font-size: 13px; color: #fff; font-weight: 700; }
+    .footer-desc { font-size: 11px; color: #7f8c8d; }
+    .footer-btn {
+      background: #1c273c; border: 1.5px solid #3b5379; color: #fff; text-decoration: none;
+      font-size: 11px; font-weight: 800; padding: 7px 12px; border-radius: 8px;
+      display: flex; align-items: center; gap: 5px; flex-shrink: 0; transition: background 0.15s;
+    }
+    .footer-btn:hover { background: #253552; border-color: #f1c40f; }
+    .copyright { text-align: center; font-size: 11px; color: #4a5568; margin-top: 8px; }
   </style>
 </head>
 <body>
   <div class="header">
     <h1>🎲 Ludo King Pro Suite</h1>
     <div class="subtitle">Remote Controller & Mod APK Hub</div>
+    <div class="creator-pill">
+      <span class="pulse-dot"></span>
+      <span>Crafted & Engineered by</span>
+      <a href="https://github.com/takaisbjehei" target="_blank" class="taka-glow">Taka</a>
+      <span>👑</span>
+    </div>
   </div>
 
   <!-- NAVIGATION TABS -->
@@ -219,22 +296,22 @@
   <div class="view-section active" id="view-download">
     <div class="hero-card">
       <div class="apk-icon">🎲</div>
-      <div class="apk-title">Ludo King: Remote Controlled Edition</div>
+      <div class="apk-title">Ludo King: Made by Taka Edition</div>
       <div class="apk-tagline">Integrated Wireless Broadcast Hook & Dice Rigging Architecture</div>
       <div class="apk-badges">
         <span class="badge gold">v8.0.0.x Patched</span>
         <span class="badge">Signed APK</span>
-        <span class="badge">No Root Needed</span>
+        <span class="badge taka-tag">⚡ Modded by Taka</span>
       </div>
 
       <!-- DIRECT DOWNLOAD BUTTON -->
-      <a href="/downloads/Ludo_King_Remote_Controlled.apk" download="Ludo_King_Remote_Controlled.apk" class="btn-download-primary" id="btn-primary-dl">
+      <a href="/downloads/Ludo_King_Made_by_Taka.apk" download="Ludo_King_Made_by_Taka.apk" class="btn-download-primary" id="btn-primary-dl">
         <span>📥 Download APK (Direct)</span>
         <span style="font-size:12px; opacity:0.85;">(55.2 MB)</span>
       </a>
 
       <!-- FAST GITHUB CDN MIRROR BUTTON -->
-      <a href="https://github.com/takaisbjehei/ludo-king-remote/releases/download/v1.0.0/Ludo_King_Remote_Controlled.apk" class="btn-download-mirror" target="_blank">
+      <a href="https://github.com/takaisbjehei/ludo-king-remote/releases/download/v1.0.0/Ludo_King_Made_by_Taka.apk" class="btn-download-mirror" target="_blank">
         <span>⚡ High-Speed Mirror (GitHub CDN)</span>
       </a>
 
@@ -289,7 +366,7 @@
         <div class="step-row">
           <div class="step-num">1</div>
           <div class="step-text">
-            <strong>Install APK:</strong> Download and install <code>Ludo_King_Remote_Controlled.apk</code>. (Uninstall any existing version first).
+            <strong>Install APK:</strong> Download and install <code>Ludo_King_Made_by_Taka.apk</code>. (Uninstall any existing version first).
           </div>
         </div>
         <div class="step-row">
@@ -362,6 +439,22 @@
       </div>
     </div>
   </div>
+
+  <!-- CREATIVE FOOTER BRANDING -->
+  <footer class="footer-container">
+    <div class="footer-card">
+      <div class="footer-content">
+        <div class="footer-badge">SYSTEM ARCHITECT</div>
+        <div class="footer-name">Engineered with <span style="color:#e74c3c;">❤️</span> by <a href="https://github.com/takaisbjehei" target="_blank" class="taka-glow-large">Taka</a></div>
+        <div class="footer-desc">Custom APK Smali Rigger & Universal Cloud WebSocket Remote</div>
+      </div>
+      <a href="https://github.com/takaisbjehei" target="_blank" class="footer-btn">
+        <svg height="14" width="14" viewBox="0 0 16 16" fill="currentColor" style="display:inline-block; vertical-align:middle; margin-right:4px;"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
+        GitHub
+      </a>
+    </div>
+    <div class="copyright">© 2026 Taka • All Rights Reserved</div>
+  </footer>
 
   <div class="toast" id="toast">Command sent</div>
 
