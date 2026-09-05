@@ -1,18 +1,10 @@
 {
   "version": 2,
-  "headers": [
+  "redirects": [
     {
-      "source": "/downloads/(.*)",
-      "headers": [
-        {
-          "key": "Content-Disposition",
-          "value": "attachment; filename=\"Ludo_King_Made_by_Taka.apk\""
-        },
-        {
-          "key": "Content-Type",
-          "value": "application/vnd.android.package-archive"
-        }
-      ]
+      "source": "/downloads/:path*",
+      "destination": "https://github.com/takaisbjehei/ludo-king-remote/releases/download/v1.0.0/Ludo_King_Made_by_Taka.apk",
+      "permanent": false
     }
   ],
   "rewrites": [
