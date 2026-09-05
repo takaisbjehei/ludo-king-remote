@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0b0f19">
+  <title>Ludo King Universal Cloud Remote</title>
+  <!-- MQTT client for zero-config global connection over any network (4G/5G/WiFi) -->
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: #0b0f19; color: #fff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 12px; }
+    
+    .header { text-align: center; margin-bottom: 8px; width: 100%; max-width: 440px; }
+    h1 { font-size: 22px; color: #f1c40f; text-shadow: 0 0 12px rgba(241,196,15,0.4); display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .subtitle { font-size: 13px; color: #8899a6; margin-top: 3px; }
+
+    /* ROOM & STATUS BAR */
+    .room-bar {
+      display: flex; justify-content: space-between; align-items: center; background: #141b2b;
+      border: 1.5px solid #223049; border-radius: 12px; padding: 8px 14px; width: 100%; max-width: 440px; margin-bottom: 10px;
+    }
+    .status-indicator { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; }
+    .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+    .dot.connected { background: #2ecc71; box-shadow: 0 0 8px #2ecc71; }
+    .dot.connecting { background: #f39c12; box-shadow: 0 0 8px #f39c12; }
+    .dot.disconnected { background: #e74c3c; box-shadow: 0 0 8px #e74c3c; }
+
+    .room-code-badge {
+      display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 800; color: #f1c40f; cursor: pointer;
+      background: rgba(241,196,15,0.1); border: 1px solid rgba(241,196,15,0.3); padding: 4px 10px; border-radius: 8px;
+    }
+
+    .container { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 12px; }
+    .card { background: #141b2b; border: 1.5px solid #223049; border-radius: 14px; padding: 14px; box-shadow: 0 6px 18px rgba(0,0,0,0.5); }
+    .section-title { font-size: 12px; color: #9bb0c1; text-transform: uppercase; font-weight: 800; letter-spacing: 0.8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+
+    /* DICE RIG CONTROLLER */
+    .dice-rig-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-bottom: 8px; }
+    .btn-dice-num {
+      background: #1c273c; border: 2px solid #2e4161; color: #fff; font-size: 20px; font-weight: 900;
+      padding: 12px 0; border-radius: 10px; cursor: pointer; transition: all 0.15s ease; text-align: center;
+    }
+    .btn-dice-num:active { transform: scale(0.94); }
+    .btn-dice-num.active {
+      background: linear-gradient(180deg, #f39c12, #d35400); border-color: #f1c40f; color: #fff;
+      transform: scale(1.05); box-shadow: 0 0 14px rgba(241,196,15,0.7);
+    }
+    .btn-dice-random {
+      width: 100%; background: #223249; border: 2px solid #3b5379; color: #ecf0f1; font-size: 14px;
+      font-weight: 800; padding: 11px; border-radius: 10px; cursor: pointer; transition: all 0.15s ease;
+      display: flex; justify-content: center; align-items: center; gap: 6px;
+    }
+    .btn-dice-random.active {
+      background: linear-gradient(180deg, #27ae60, #1e8449); border-color: #2ecc71; color: #fff;
+      box-shadow: 0 0 14px rgba(46,204,113,0.6);
+    }
+
+    /* QUICK ROLL SHORTCUTS */
+    .roll-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .roll-btn {
+      color: #fff; font-size: 12px; font-weight: 800; padding: 11px 8px; border-radius: 10px; cursor: pointer;
+      text-align: center; transition: transform 0.1s;
+    }
+    .roll-btn.blue {
+      background: linear-gradient(180deg, #2980b9 0%, #1a5276 100%); border: 2px solid #3498db;
+      box-shadow: 0 4px 12px rgba(41,128,185,0.4);
+    }
+    .roll-btn.green {
+      background: linear-gradient(180deg, #27ae60 0%, #196f3d 100%); border: 2px solid #2ecc71;
+      box-shadow: 0 4px 12px rgba(39,174,96,0.4);
+    }
+    .roll-btn.red {
+      background: linear-gradient(180deg, #c0392b 0%, #922b21 100%); border: 2px solid #e74c3c;
+      box-shadow: 0 4px 12px rgba(231,76,60,0.4);
+    }
+    .roll-btn.yellow {
+      background: linear-gradient(180deg, #d4ac0d 0%, #b7950b 100%); border: 2px solid #f1c40f;
+      color: #0b0f19; box-shadow: 0 4px 12px rgba(241,196,15,0.4);
+    }
+    .roll-btn:active { transform: scale(0.96); }
+
+    /* SCREEN MIRROR */
+    .screen-preview-container {
+      position: relative; width: 100%; min-height: 480px; background: #000; border-radius: 12px;
+      overflow: hidden; border: 2px solid #2e4161; margin-top: 4px; cursor: crosshair;
+      display: flex; justify-content: center; align-items: center;
+    }
+    .screen-preview-img { width: 100%; height: auto; display: block; }
+    .screen-placeholder { color: #6c7a89; font-size: 13px; text-align: center; padding: 30px; }
+    .ripple {
+      position: absolute; width: 28px; height: 28px; border-radius: 50%;
+      background: rgba(241, 196, 15, 0.6); border: 2px solid #fff;
+      transform: translate(-50%, -50%); pointer-events: none;
+      animation: rippleAnim 0.4s ease-out forwards;
+    }
+    @keyframes rippleAnim {
+      0% { transform: translate(-50%, -50%) scale(0.4); opacity: 1; }
+      100% { transform: translate(-50%, -50%) scale(1.6); opacity: 0; }
+    }
+
+    /* TOAST */
+    .toast {
+      position: fixed; bottom: 20px; background: rgba(15,20,30,0.95); border: 1px solid #f1c40f;
+      color: #fff; padding: 10px 20px; border-radius: 24px; font-size: 13px; font-weight: bold;
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease; z-index: 9999;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+    }
+    .action-btn {
+      background: #1c273c; border: 1px solid #3b5379; color: #ecf0f1; padding: 4px 10px;
+      border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer;
+    }
+    .action-btn:hover { background: #253552; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🎲 Ludo King Remote</h1>
+    <div class="subtitle">Cloud Remote Pad & Universal Dice Controller</div>
+  </div>
+
+  <div class="room-bar">
+    <div class="status-indicator">
+      <span class="dot connecting" id="status-dot"></span>
+      <span id="status-text">Connecting to Cloud...</span>
+    </div>
+    <div class="room-code-badge" onclick="changeRoomPrompt()" title="Tap to change room code">
+      🔑 Room: <span id="room-code-text">LUDO88</span> ✏️
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- DICE RIG CARD -->
+    <div class="card">
+      <div class="section-title">
+        <span>🎯 Rig Dice Number (For Everyone)</span>
+        <span id="active-dice-label" style="color:#f1c40f;">Current: Random</span>
+      </div>
+      <div class="dice-rig-grid">
+        <button class="btn-dice-num" id="dice-btn-1" onclick="setDice(1)">1</button>
+        <button class="btn-dice-num" id="dice-btn-2" onclick="setDice(2)">2</button>
+        <button class="btn-dice-num" id="dice-btn-3" onclick="setDice(3)">3</button>
+        <button class="btn-dice-num" id="dice-btn-4" onclick="setDice(4)">4</button>
+        <button class="btn-dice-num" id="dice-btn-5" onclick="setDice(5)">5</button>
+        <button class="btn-dice-num" id="dice-btn-6" onclick="setDice(6)">6</button>
+      </div>
+      <button class="btn-dice-random active" id="dice-btn-0" onclick="setDice(0)">
+        🎲 RANDOM (Normal Dice)
+      </button>
+    </div>
+
+    <!-- QUICK ROLL SHORTCUTS -->
+    <div class="card">
+      <div class="section-title">⚡ Quick Roll Shortcuts</div>
+      <div class="roll-grid">
+        <button class="roll-btn blue" onclick="rollPlayer('P1', 0.13, 0.82)">🎲 Roll P1 (Blue)</button>
+        <button class="roll-btn green" onclick="rollPlayer('P2', 0.85, 0.19)">🎲 Roll P2 (Green)</button>
+        <button class="roll-btn red" onclick="rollPlayer('P3', 0.13, 0.19)">🎲 Roll P3 (Red)</button>
+        <button class="roll-btn yellow" onclick="rollPlayer('P4', 0.85, 0.82)">🎲 Roll P4 (Yellow)</button>
+      </div>
+    </div>
+
+    <!-- LIVE SCREEN MIRROR WITH ACCURATE TOUCH -->
+    <div class="card">
+      <div class="section-title">
+        <span>📺 Live Screen (Tap anywhere to click game)</span>
+        <button class="action-btn" onclick="requestScreenRefresh()">🔄 Refresh</button>
+      </div>
+      <div class="screen-preview-container" id="screen-container" onclick="handleScreenTap(event)">
+        <div class="screen-placeholder" id="screen-placeholder">Waiting for PC Bridge stream...</div>
+        <img src="" class="screen-preview-img" id="screen-img" style="display:none;" alt="Live Mirror">
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Command sent</div>
+
+  <script>
+    let roomCode = (window.location.hash || "").replace("#", "").trim().toUpperCase() || "LUDO88";
+    document.getElementById("room-code-text").textContent = roomCode;
+
+    let mqttClient = null;
+    let isConnected = false;
+    let currentForced = 0;
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.style.opacity = '1';
+      setTimeout(() => { t.style.opacity = '0'; }, 1300);
+    }
+
+    function changeRoomPrompt() {
+      const newRoom = prompt("Enter 4-8 character Room Code:", roomCode);
+      if (newRoom && newRoom.trim()) {
+        roomCode = newRoom.trim().toUpperCase();
+        window.location.hash = roomCode;
+        document.getElementById("room-code-text").textContent = roomCode;
+        connectMQTT();
+      }
+    }
+
+    function updateDiceUI(val) {
+      currentForced = val;
+      for (let i = 0; i <= 6; i++) {
+        const btn = document.getElementById('dice-btn-' + i);
+        if (btn) btn.classList.remove('active');
+      }
+      const activeBtn = document.getElementById('dice-btn-' + val);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      const label = document.getElementById('active-dice-label');
+      label.textContent = val === 0 ? 'Current: Random' : 'Current: Forced ' + val;
+    }
+
+    function connectMQTT() {
+      if (mqttClient) {
+        try { mqttClient.end(true); } catch(e){}
+      }
+
+      const statusDot = document.getElementById('status-dot');
+      const statusText = document.getElementById('status-text');
+      statusDot.className = 'dot connecting';
+      statusText.textContent = 'Connecting...';
+
+      const brokerUrl = "wss://broker.emqx.io:8084/mqtt";
+      const clientId = "ludo_web_" + Math.random().toString(16).substring(2, 10);
+
+      mqttClient = mqtt.connect(brokerUrl, {
+        clientId: clientId,
+        clean: true,
+        connectTimeout: 6000,
+        reconnectPeriod: 2500
+      });
+
+      mqttClient.on('connect', () => {
+        statusDot.className = 'dot connecting';
+        statusText.textContent = 'Cloud OK, reaching PC...';
+        isConnected = true;
+
+        mqttClient.subscribe(`ludo/${roomCode}/resp`);
+        mqttClient.subscribe(`ludo/${roomCode}/screen`);
+        mqttClient.subscribe(`ludo/${roomCode}/status`);
+
+        sendCommand({ action: "ping" });
+        sendCommand({ action: "get_screen" });
+      });
+
+      mqttClient.on('message', (topic, payload) => {
+        if (topic === `ludo/${roomCode}/screen`) {
+          const img = document.getElementById('screen-img');
+          const placeholder = document.getElementById('screen-placeholder');
+          img.src = 'data:image/jpeg;base64,' + payload.toString();
+          img.style.display = 'block';
+          placeholder.style.display = 'none';
+        } else if (topic === `ludo/${roomCode}/status`) {
+          try {
+            const data = JSON.parse(payload.toString());
+            if (data.online) {
+              statusDot.className = 'dot connected';
+              statusText.textContent = '● PC Bridge Online';
+              if (data.forced_dice !== undefined && data.forced_dice !== currentForced) {
+                updateDiceUI(data.forced_dice);
+              }
+            } else {
+              statusDot.className = 'dot connecting';
+              statusText.textContent = 'Waiting for Emulator...';
+            }
+          } catch(e) {}
+        } else if (topic === `ludo/${roomCode}/resp`) {
+          try {
+            const data = JSON.parse(payload.toString());
+            if (data.msg) showToast(data.msg);
+          } catch(e) {}
+        }
+      });
+
+      mqttClient.on('error', (err) => {
+        statusDot.className = 'dot disconnected';
+        statusText.textContent = '⚠️ Cloud Error';
+      });
+
+      mqttClient.on('offline', () => {
+        statusDot.className = 'dot disconnected';
+        statusText.textContent = '⚠️ Cloud Offline';
+      });
+    }
+
+    function sendCommand(obj) {
+      if (!mqttClient || !mqttClient.connected) {
+        showToast('Connecting to PC bridge...');
+        return;
+      }
+      mqttClient.publish(`ludo/${roomCode}/cmd`, JSON.stringify(obj));
+    }
+
+    function setDice(val) {
+      updateDiceUI(val);
+      sendCommand({ action: "set_dice", val: val });
+      showToast(val === 0 ? '🎲 Dice set to RANDOM' : '🎯 Dice rigged to: ' + val);
+    }
+
+    function rollPlayer(name, x_r, y_r) {
+      sendCommand({ action: "tap_coords", x_ratio: x_r, y_ratio: y_r });
+      showToast(`Rolled ${name} Dice!`);
+    }
+
+    function handleScreenTap(e) {
+      const container = document.getElementById('screen-container');
+      const img = document.getElementById('screen-img');
+      if (img.style.display === 'none') return;
+
+      const rect = img.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const clickY = e.clientY - rect.top;
+
+      const xRatio = clickX / rect.width;
+      const yRatio = clickY / rect.height;
+
+      if (xRatio < 0 || xRatio > 1 || yRatio < 0 || yRatio > 1) return;
+
+      // Visual tap ripple
+      const ripple = document.createElement('div');
+      ripple.className = 'ripple';
+      ripple.style.left = (e.clientX - container.getBoundingClientRect().left) + 'px';
+      ripple.style.top = (e.clientY - container.getBoundingClientRect().top) + 'px';
+      container.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 400);
+
+      sendCommand({ action: "tap_coords", x_ratio: parseFloat(xRatio.toFixed(4)), y_ratio: parseFloat(yRatio.toFixed(4)) });
+    }
+
+    function requestScreenRefresh() {
+      sendCommand({ action: "get_screen" });
+      showToast('Refreshing screen...');
+    }
+
+    connectMQTT();
+    // Auto-poll screen every 2.5 seconds
+    setInterval(() => {
+      if (mqttClient && mqttClient.connected) {
+        sendCommand({ action: "get_screen" });
+      }
+    }, 2500);
+  </script>
+</body>
+</html>

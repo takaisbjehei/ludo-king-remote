@@ -1,0 +1,17 @@
+# Large build artifacts & decompiled APK files
+apk_decompiled/
+*.apk
+*.jar
+*.keystore
+ludo_king_layouts/
+ludo_web_app/
+scratch/
+__pycache__/
+*.pyc
+
+# Local screen dumps & temporary files
+*.png
+*.log
+window_dump.xml
+temp_sc.png
+web_screen.png
