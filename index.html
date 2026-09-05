@@ -416,8 +416,16 @@
 
       <!-- QUICK ROOM JOIN INPUT -->
       <div style="display:flex; gap:6px;">
-        <input type="text" id="custom-room-input" placeholder="Join room code (e.g. TK4821)" style="flex:1; background:#1b2434; border:1px solid #3b5379; color:#fff; padding:7px 10px; border-radius:8px; font-size:12px; font-weight:700; outline:none; text-transform:uppercase;">
+        <input type="text" id="custom-room-input" placeholder="Join room code (e.g. TK7788)" onkeydown="if(event.key==='Enter') joinCustomRoom()" style="flex:1; background:#1b2434; border:1px solid #3b5379; color:#fff; padding:7px 10px; border-radius:8px; font-size:12px; font-weight:700; outline:none; text-transform:uppercase;">
         <button onclick="joinCustomRoom()" style="background:#3498db; border:none; color:#fff; font-weight:800; padding:7px 14px; border-radius:8px; font-size:12px; cursor:pointer;">Join</button>
+      </div>
+
+      <!-- ACTIVE CLOUD ROOMS CONTAINER -->
+      <div id="recent-rooms-container" style="margin-top:10px; padding-top:8px; border-top:1px solid rgba(255,255,255,0.08); display:flex; flex-direction:column; gap:6px;">
+        <div style="font-size:10px; color:#8899a6; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Active Cloud Rooms (Click to Join):</div>
+        <div id="recent-rooms-list" style="display:flex; gap:6px; flex-wrap:wrap;">
+          <span style="font-size:11px; color:#64748b;">Loading active rooms...</span>
+        </div>
       </div>
     </div>
 
@@ -521,24 +529,6 @@
       }
     }
 
-    // Hash routing - auto-generate fresh random room code per session
-    let hash = (window.location.hash || "").replace("#", "").trim();
-    let roomCode = "TK" + Math.floor(1000 + Math.random() * 9000);
-    if (hash && hash !== "download") {
-      roomCode = hash.toUpperCase();
-    } else {
-      window.location.hash = roomCode;
-    }
-    document.getElementById("room-code-text").textContent = roomCode;
-    const rDisp = document.getElementById("room-code-display");
-    if (rDisp) rDisp.textContent = roomCode;
-    const cInp = document.getElementById("custom-room-input");
-    if (cInp) cInp.value = roomCode;
-
-    if (hash && hash !== "download") {
-      switchTab('remote');
-    }
-
     // Supabase Cloud Configuration (Zero local IP required)
     const SUPABASE_URL = "https://unuyszdsdyujbsqfmyqg.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVudXlzemRzZHl1amJzcWZteXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg1ODE2ODIsImV4cCI6MjEwNDE1NzY4Mn0.rvIS8HEeD_nXHq3nu7RBhKX4BxiHTshgdlZE_w90RMg";
@@ -547,8 +537,60 @@
     let isConnected = false;
     let currentForced = 0;
 
+    // Hash routing & room code initialization
+    let hash = (window.location.hash || "").replace("#", "").trim();
+    let roomCode = "TK7788"; // Default to active room
+    if (hash && hash !== "download") {
+      roomCode = hash.toUpperCase();
+    } else {
+      window.location.hash = roomCode;
+    }
+
+    function setCloudStatus(online, customMsg) {
+      const statusDot = document.getElementById('status-dot');
+      const statusText = document.getElementById('status-text');
+      const badge = document.getElementById('cloud-status-badge');
+      if (online) {
+        if (statusDot) statusDot.className = 'dot connected';
+        if (statusText) statusText.innerHTML = customMsg || `● Connected • Room: <span style="color:#f1c40f;font-weight:900;">${roomCode}</span>`;
+        if (badge) {
+          badge.innerHTML = `🌐 SUPABASE CLOUD: ONLINE • <b style="color:#f1c40f;">${roomCode}</b>`;
+          badge.style.color = '#2ecc71';
+        }
+      } else {
+        if (statusDot) statusDot.className = 'dot disconnected';
+        if (statusText) statusText.textContent = customMsg || '⚠️ Cloud Disconnected';
+        if (badge) {
+          badge.textContent = '⚠️ SUPABASE CLOUD: OFFLINE';
+          badge.style.color = '#e74c3c';
+        }
+      }
+    }
+
+    function syncRoomUI() {
+      const rText = document.getElementById("room-code-text");
+      if (rText) rText.textContent = roomCode;
+      const disp = document.getElementById("room-code-display");
+      if (disp) disp.textContent = roomCode;
+      const inp = document.getElementById("custom-room-input");
+      if (inp) inp.value = roomCode;
+      setCloudStatus(true);
+    }
+
+    syncRoomUI();
+
+    if (hash && hash !== "download") {
+      switchTab('remote');
+    }
+
     async function pushToSupabase(val) {
+      if (!roomCode) return;
       try {
+        const payload = {
+          room_code: roomCode,
+          dice: val,
+          updated_at: new Date().toISOString()
+        };
         const resp = await fetch(`${SUPABASE_URL}/rest/v1/ludo_rooms?on_conflict=room_code`, {
           method: 'POST',
           headers: {
@@ -557,15 +599,10 @@
             'Authorization': `Bearer ${SUPABASE_KEY}`,
             'Prefer': 'resolution=merge-duplicates'
           },
-          body: JSON.stringify({ room_code: roomCode, dice: val })
+          body: JSON.stringify(payload)
         });
         if (resp.ok) {
-          const statusDot = document.getElementById('status-dot');
-          const statusText = document.getElementById('status-text');
-          if (statusDot) statusDot.className = 'dot connected';
-          if (statusText && !statusText.textContent.includes('PC Bridge')) {
-            statusText.textContent = '● Cloud Server Active';
-          }
+          setCloudStatus(true);
         }
       } catch (err) {
         console.warn('Supabase push error:', err);
@@ -573,6 +610,7 @@
     }
 
     async function pollSupabase() {
+      if (!roomCode) return;
       try {
         const resp = await fetch(`${SUPABASE_URL}/rest/v1/ludo_rooms?room_code=eq.${roomCode}&select=*&apikey=${SUPABASE_KEY}`, {
           headers: {
@@ -581,25 +619,72 @@
           }
         });
         if (resp.ok) {
+          setCloudStatus(true);
           const data = await resp.json();
-          const statusDot = document.getElementById('status-dot');
-          const statusText = document.getElementById('status-text');
-          if (statusDot && statusDot.className !== 'dot connected') statusDot.className = 'dot connected';
-          if (statusText && statusText.textContent === 'Connecting to Cloud...') {
-            statusText.textContent = '● Cloud Server Online';
-          }
           if (data && data.length > 0) {
             const d = data[0].dice;
             if (d !== undefined && d !== currentForced) {
               updateDiceUI(d);
             }
+          } else {
+            // Auto-create room in cloud with current dice
+            pushToSupabase(currentForced);
           }
         }
-      } catch (e) {}
+      } catch (e) {
+        console.warn('Supabase poll error:', e);
+      }
+      fetchRecentRooms();
     }
 
-    // Start cloud polling
+    async function fetchRecentRooms() {
+      try {
+        const resp = await fetch(`${SUPABASE_URL}/rest/v1/ludo_rooms?order=updated_at.desc&limit=6&select=room_code,dice&apikey=${SUPABASE_KEY}`, {
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`
+          }
+        });
+        if (resp.ok) {
+          const list = await resp.json();
+          const container = document.getElementById('recent-rooms-list');
+          if (container && list && list.length > 0) {
+            container.innerHTML = '';
+            list.forEach(item => {
+              const span = document.createElement('span');
+              const isCurr = (item.room_code === roomCode);
+              span.style.cssText = `font-size:11px; font-weight:800; padding:4px 9px; border-radius:6px; cursor:pointer; background:${isCurr ? 'linear-gradient(135deg, #f39c12, #d35400)' : '#1e293b'}; color:${isCurr ? '#ffffff' : '#f1c40f'}; border:1px solid ${isCurr ? '#f1c40f' : '#3b5379'}; transition:all 0.15s;`;
+              span.textContent = item.room_code + (item.dice > 0 ? ` [🎯${item.dice}]` : '');
+              span.onclick = () => {
+                setNewRoomCode(item.room_code);
+                showToast('Joined Room: ' + item.room_code);
+              };
+              container.appendChild(span);
+            });
+          }
+        }
+      } catch(e) {}
+    }
+
+    // Auto-discover the latest active room if no hash was in the URL
+    async function autoDiscoverLatestRoom() {
+      if (hash && hash !== "download") return;
+      try {
+        const resp = await fetch(`${SUPABASE_URL}/rest/v1/ludo_rooms?order=updated_at.desc&limit=1&select=room_code&apikey=${SUPABASE_KEY}`, {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+        });
+        if (resp.ok) {
+          const list = await resp.json();
+          if (list && list.length > 0 && list[0].room_code) {
+            setNewRoomCode(list[0].room_code);
+          }
+        }
+      } catch(e) {}
+    }
+
+    // Initial Supabase startup
     pollSupabase();
+    autoDiscoverLatestRoom();
     setInterval(pollSupabase, 1200);
 
     function showToast(msg) {
@@ -623,26 +708,30 @@
       const inp = document.getElementById('custom-room-input');
       const val = (inp ? inp.value : "").trim().toUpperCase();
       if (!val) {
-        showToast('Please enter a room code');
+        showToast('Please enter a room code (e.g. TK7788)');
         return;
       }
       setNewRoomCode(val);
-      showToast('Joined Room: ' + val);
+      showToast('🟢 Connected to Room: ' + val);
     }
 
     function setNewRoomCode(code) {
-      roomCode = code.toUpperCase();
+      if (!code) return;
+      roomCode = code.toUpperCase().trim();
       window.location.hash = roomCode;
-      document.getElementById("room-code-text").textContent = roomCode;
-      const disp = document.getElementById("room-code-display");
-      if (disp) disp.textContent = roomCode;
-      const inp = document.getElementById("custom-room-input");
-      if (inp) inp.value = roomCode;
+      syncRoomUI();
 
       // Push initial state to Supabase with latest updated_at
       pushToSupabase(currentForced);
       pollSupabase();
-      connectMQTT();
+
+      if (mqttClient && mqttClient.connected) {
+        try {
+          mqttClient.subscribe(`ludo/${roomCode}/resp`);
+          mqttClient.subscribe(`ludo/${roomCode}/screen`);
+          mqttClient.subscribe(`ludo/${roomCode}/status`);
+        } catch(e){}
+      }
     }
 
     function copyRoomLink() {
@@ -679,74 +768,65 @@
         try { mqttClient.end(true); } catch(e){}
       }
 
-      const statusDot = document.getElementById('status-dot');
-      const statusText = document.getElementById('status-text');
-      if (statusDot) statusDot.className = 'dot connecting';
-      if (statusText) statusText.textContent = 'Connecting...';
-
       const brokerUrl = "wss://broker.emqx.io:8084/mqtt";
       const clientId = "ludo_web_" + Math.random().toString(16).substring(2, 10);
 
-      mqttClient = mqtt.connect(brokerUrl, {
-        clientId: clientId,
-        clean: true,
-        connectTimeout: 6000,
-        reconnectPeriod: 2500
-      });
+      try {
+        mqttClient = mqtt.connect(brokerUrl, {
+          clientId: clientId,
+          clean: true,
+          connectTimeout: 6000,
+          reconnectPeriod: 2500
+        });
 
-      mqttClient.on('connect', () => {
-        if (statusDot) statusDot.className = 'dot connecting';
-        if (statusText) statusText.textContent = 'Cloud OK, reaching PC...';
-        isConnected = true;
+        mqttClient.on('connect', () => {
+          isConnected = true;
+          mqttClient.subscribe(`ludo/${roomCode}/resp`);
+          mqttClient.subscribe(`ludo/${roomCode}/screen`);
+          mqttClient.subscribe(`ludo/${roomCode}/status`);
 
-        mqttClient.subscribe(`ludo/${roomCode}/resp`);
-        mqttClient.subscribe(`ludo/${roomCode}/screen`);
-        mqttClient.subscribe(`ludo/${roomCode}/status`);
+          sendCommand({ action: "ping" });
+          sendCommand({ action: "get_screen" });
+        });
 
-        sendCommand({ action: "ping" });
-        sendCommand({ action: "get_screen" });
-      });
-
-      mqttClient.on('message', (topic, payload) => {
-        if (topic === `ludo/${roomCode}/screen`) {
-          const img = document.getElementById('screen-img');
-          const placeholder = document.getElementById('screen-placeholder');
-          if (img && placeholder) {
-            img.src = 'data:image/jpeg;base64,' + payload.toString();
-            img.style.display = 'block';
-            placeholder.style.display = 'none';
-          }
-        } else if (topic === `ludo/${roomCode}/status`) {
-          try {
-            const data = JSON.parse(payload.toString());
-            if (data.online) {
-              if (statusDot) statusDot.className = 'dot connected';
-              if (statusText) statusText.textContent = '● PC Bridge Online';
-              if (data.forced_dice !== undefined && data.forced_dice !== currentForced) {
-                updateDiceUI(data.forced_dice);
-              }
-            } else {
-              if (statusDot) statusDot.className = 'dot connecting';
-              if (statusText) statusText.textContent = 'Waiting for Emulator...';
+        mqttClient.on('message', (topic, payload) => {
+          if (topic === `ludo/${roomCode}/screen`) {
+            const img = document.getElementById('screen-img');
+            const placeholder = document.getElementById('screen-placeholder');
+            if (img && placeholder) {
+              img.src = 'data:image/jpeg;base64,' + payload.toString();
+              img.style.display = 'block';
+              placeholder.style.display = 'none';
             }
-          } catch(e) {}
-        } else if (topic === `ludo/${roomCode}/resp`) {
-          try {
-            const data = JSON.parse(payload.toString());
-            if (data.msg) showToast(data.msg);
-          } catch(e) {}
-        }
-      });
+          } else if (topic === `ludo/${roomCode}/status`) {
+            try {
+              const data = JSON.parse(payload.toString());
+              if (data.online) {
+                const ph = document.getElementById('screen-placeholder');
+                if (ph) ph.textContent = 'PC Emulator connected! Streaming...';
+                if (data.forced_dice !== undefined && data.forced_dice !== currentForced) {
+                  updateDiceUI(data.forced_dice);
+                }
+              }
+            } catch(e) {}
+          } else if (topic === `ludo/${roomCode}/resp`) {
+            try {
+              const data = JSON.parse(payload.toString());
+              if (data.msg) showToast(data.msg);
+            } catch(e) {}
+          }
+        });
 
-      mqttClient.on('error', () => {
-        if (statusDot) statusDot.className = 'dot disconnected';
-        if (statusText) statusText.textContent = '⚠️ Cloud Error';
-      });
+        mqttClient.on('error', () => {
+          // PC bridge is optional mirror, does not affect Supabase cloud
+        });
 
-      mqttClient.on('offline', () => {
-        if (statusDot) statusDot.className = 'dot disconnected';
-        if (statusText) statusText.textContent = '⚠️ Cloud Offline';
-      });
+        mqttClient.on('offline', () => {
+          // PC bridge is optional mirror, does not affect Supabase cloud
+        });
+      } catch(err) {
+        console.warn('MQTT connection error:', err);
+      }
     }
 
     function linkPhoneIP() {
@@ -794,7 +874,10 @@
     function setDice(val) {
       updateDiceUI(val);
       pushToSupabase(val);
-      sendCommand({ action: "set_dice", val: val });
+      
+      if (mqttClient && mqttClient.connected) {
+        mqttClient.publish(`ludo/${roomCode}/cmd`, JSON.stringify({ action: "set_dice", val: val }));
+      }
       
       const phoneIp = (document.getElementById('phone-ip-input')?.value || localStorage.getItem('ludo_phone_ip') || "").trim();
       if (phoneIp) {
@@ -802,7 +885,7 @@
           fetch(`http://${phoneIp}:8088/api/set_dice?val=${val}`, { mode: 'no-cors' }).catch(()=>{});
         } catch(e){}
       }
-      showToast(val === 0 ? '🎲 Dice set to RANDOM' : '🎯 Dice rigged to: ' + val);
+      showToast(val === 0 ? '🎲 Dice set to RANDOM' : '🎯 Dice rigged to: ' + val + ' (Phone Synced!)');
     }
 
     function rollPlayer(name, x_r, y_r) {
