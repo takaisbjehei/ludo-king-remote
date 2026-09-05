@@ -7,6 +7,13 @@ import json
 import base64
 import threading
 import urllib.request
+
+try:
+    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stderr.reconfigure(encoding='utf-8')
+except Exception:
+    pass
+
 from PIL import Image
 import paho.mqtt.client as mqtt
 from flask import Flask, request, jsonify, Response
@@ -243,9 +250,9 @@ if __name__ == "__main__":
     mqtt_thread.start()
     
     port = 5050
-    print(f"\n=======================================================")
-    print(f"🚀 Ludo King Master Cloud Remote Server Running")
-    print(f"🌐 Local Dashboard: http://localhost:{port}/")
-    print(f"☁️ Cloud MQTT Room: {DEFAULT_ROOM} (Any network: 4G/5G/WiFi)")
-    print(f"=======================================================\n")
+    print("\n=======================================================")
+    print(">> Ludo King Master Cloud Remote Server Running")
+    print(f">> Local Dashboard: http://localhost:{port}/")
+    print(f">> Cloud MQTT Room: {DEFAULT_ROOM} (Any network: 4G/5G/WiFi)")
+    print("=======================================================\n")
     app.run(host="0.0.0.0", port=port, debug=False)
