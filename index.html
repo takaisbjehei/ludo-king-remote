@@ -397,6 +397,21 @@
       </div>
     </div>
 
+    <!-- PHONE WI-FI LINK CARD -->
+    <div class="card" style="padding:10px 14px; background:#101726; border-color:#2a3b5c;">
+      <div style="font-size:11px; font-weight:800; color:#f1c40f; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
+        <span>📱 PLAYING ON PHYSICAL PHONE?</span>
+        <span style="font-size:10px; color:#8899a6; cursor:pointer;" onclick="showPhoneHelp()">ℹ️ How to find IP</span>
+      </div>
+      <div style="display:flex; gap:6px;">
+        <input type="text" id="phone-ip-input" placeholder="Phone IP (e.g. 192.168.1.15)" style="flex:1; background:#1b2434; border:1px solid #3b5379; color:#fff; padding:7px 10px; border-radius:8px; font-size:12px; font-weight:700; outline:none;">
+        <button onclick="linkPhoneIP()" style="background:#27ae60; border:none; color:#fff; font-weight:800; padding:7px 12px; border-radius:8px; font-size:11px; cursor:pointer;">Link Phone</button>
+      </div>
+      <div id="phone-link-status" style="font-size:10px; color:#7f8c8d; margin-top:5px; line-height:1.3;">
+        Enter your phone's Wi-Fi IP if playing on your actual phone. Or open <a id="direct-phone-link" href="#" target="_blank" style="color:#f1c40f; text-decoration:underline;">http://[Phone-IP]:8088/</a> directly in browser!
+      </div>
+    </div>
+
     <!-- DICE RIG CARD -->
     <div class="card">
       <div class="section-title">
@@ -603,6 +618,40 @@
       });
     }
 
+    function linkPhoneIP() {
+      const ip = (document.getElementById('phone-ip-input').value || "").trim();
+      if (!ip) {
+        showToast('Please enter your phone IP (e.g. 192.168.1.15)');
+        return;
+      }
+      localStorage.setItem('ludo_phone_ip', ip);
+      sendCommand({ action: "set_phone_ip", ip: ip });
+      const link = document.getElementById('direct-phone-link');
+      if (link) {
+        link.href = `http://${ip}:8088/`;
+        link.textContent = `http://${ip}:8088/`;
+      }
+      showToast(`Linked Phone: ${ip}`);
+    }
+
+    function showPhoneHelp() {
+      alert("HOW TO CONNECT YOUR PHONE:\n\n1. On your phone, go to Settings -> Wi-Fi -> details.\n2. Note your IP address (e.g. 192.168.1.15).\n3. Type it into the box above and tap 'Link Phone'.\n\nOR OPEN DIRECTLY:\nYou can also simply open http://<phone-ip>:8088/ directly in your PC browser — the game has a built-in remote web server!");
+    }
+
+    // Auto-restore saved phone IP
+    const savedIp = localStorage.getItem('ludo_phone_ip');
+    if (savedIp) {
+      setTimeout(() => {
+        const inp = document.getElementById('phone-ip-input');
+        const link = document.getElementById('direct-phone-link');
+        if (inp) inp.value = savedIp;
+        if (link) {
+          link.href = `http://${savedIp}:8088/`;
+          link.textContent = `http://${savedIp}:8088/`;
+        }
+      }, 500);
+    }
+
     function sendCommand(obj) {
       if (!mqttClient || !mqttClient.connected) {
         showToast('Connecting to PC bridge...');
@@ -614,6 +663,13 @@
     function setDice(val) {
       updateDiceUI(val);
       sendCommand({ action: "set_dice", val: val });
+      
+      const phoneIp = (document.getElementById('phone-ip-input').value || localStorage.getItem('ludo_phone_ip') || "").trim();
+      if (phoneIp) {
+        try {
+          fetch(`http://${phoneIp}:8088/api/set_dice?val=${val}`, { mode: 'no-cors' }).catch(()=>{});
+        } catch(e){}
+      }
       showToast(val === 0 ? '🎲 Dice set to RANDOM' : '🎯 Dice rigged to: ' + val);
     }
 

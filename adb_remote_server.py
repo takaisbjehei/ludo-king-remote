@@ -30,6 +30,7 @@ TEMP_SCREEN_PATH = os.path.join(TEMP_DIR, "web_screen.png")
 CURRENT_FORCED_DICE = 0
 DEFAULT_ROOM = "LUDO88"
 ACTIVE_ROOMS = set([DEFAULT_ROOM])
+TARGET_PHONE_IP = None
 
 _screen_cache = {"time": 0, "b64": "", "bytes": b""}
 _screen_lock = threading.Lock()
@@ -115,6 +116,12 @@ def apply_set_dice(val):
         urllib.request.urlopen(f"http://localhost:8088/api/set_dice?val={val}", timeout=0.5)
     except Exception:
         pass
+    if TARGET_PHONE_IP:
+        try:
+            urllib.request.urlopen(f"http://{TARGET_PHONE_IP}:8088/api/set_dice?val={val}", timeout=1.0)
+            print(f"[PHONE] Sent forced dice {val} to http://{TARGET_PHONE_IP}:8088")
+        except Exception as e:
+            print(f"[PHONE] Note: http://{TARGET_PHONE_IP}:8088 unreachable ({e})")
     print(f"[DICE] Set forced dice to: {val} (0 = Random)")
 
 def apply_tap(x_ratio, y_ratio):
@@ -170,6 +177,16 @@ def on_mqtt_message(client, userdata, msg):
             if b64:
                 client.publish(f"ludo/{room}/screen", b64)
                 
+        elif action == "set_phone_ip":
+            global TARGET_PHONE_IP
+            ip = payload.get("ip", "").strip()
+            if ip:
+                TARGET_PHONE_IP = ip
+                run_adb(["connect", f"{ip}:5555"])
+                print(f"[PHONE] Target phone IP updated to: {ip}")
+                client.publish(f"ludo/{room}/resp", json.dumps({"status": "ok", "msg": f"Phone IP: {ip}"}))
+                broadcast_status(client, room)
+                
         elif action == "ping":
             broadcast_status(client, room)
             
@@ -180,9 +197,11 @@ def broadcast_status(client, room):
     if not client or not client.is_connected():
         return
     dev = get_primary_device()
+    target_disp = f"{dev} (Phone: {TARGET_PHONE_IP})" if (dev and TARGET_PHONE_IP) else (dev or TARGET_PHONE_IP or "Searching for device...")
     status_payload = {
-        "online": dev is not None,
-        "device": dev or "Searching for emulator...",
+        "online": dev is not None or TARGET_PHONE_IP is not None,
+        "device": target_disp,
+        "phone_ip": TARGET_PHONE_IP or "",
         "forced_dice": CURRENT_FORCED_DICE,
         "room": room,
         "timestamp": int(time.time())
