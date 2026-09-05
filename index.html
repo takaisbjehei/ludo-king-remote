@@ -397,14 +397,27 @@
       </div>
     </div>
 
-    <!-- SUPABASE CLOUD STATUS CARD -->
-    <div class="card" style="padding:12px 14px; background:linear-gradient(135deg, #101c2e 0%, #0d1624 100%); border:1.5px solid #2e4161;">
-      <div style="font-size:12px; font-weight:800; color:#2ecc71; margin-bottom:4px; display:flex; justify-content:space-between; align-items:center;">
-        <span>🌐 SUPABASE CLOUD SYNC: ACTIVE</span>
-        <span style="font-size:10px; background:rgba(46,204,113,0.2); color:#2ecc71; padding:2px 8px; border-radius:10px; font-weight:800;">GLOBAL 4G/5G/WIFI</span>
+    <!-- SUPABASE CLOUD STATUS CARD WITH RANDOM ROOM GENERATOR -->
+    <div class="card" style="padding:14px; background:linear-gradient(135deg, #101c2e 0%, #0d1624 100%); border:1.5px solid #2e4161;">
+      <div style="font-size:12px; font-weight:800; color:#2ecc71; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+        <span id="cloud-status-badge">🌐 SUPABASE CLOUD: ONLINE</span>
+        <span style="font-size:10px; background:rgba(46,204,113,0.2); color:#2ecc71; padding:2px 8px; border-radius:10px; font-weight:800;">4G/5G/WIFI SYNC</span>
       </div>
-      <div style="font-size:12px; color:#cbd5e1; line-height:1.4;">
-        Connects directly to your phone without any IP setup. Any dice chosen below syncs instantly to room <strong id="room-code-display" style="color:#f1c40f;">LUDO88</strong> on Supabase.
+      
+      <!-- BIG ROOM CODE DISPLAY & GENERATOR -->
+      <div style="background:#0a0f18; border:1.5px solid #f39c12; border-radius:12px; padding:12px; text-align:center; margin-bottom:10px;">
+        <div style="font-size:11px; color:#8899a6; text-transform:uppercase; font-weight:700; letter-spacing:0.5px;">Active Room Code</div>
+        <div id="room-code-display" style="font-size:26px; font-weight:900; color:#f1c40f; letter-spacing:2px; margin:4px 0;">LUDO88</div>
+        <div style="display:flex; gap:8px; justify-content:center; margin-top:8px;">
+          <button onclick="generateRandomRoom()" style="background:linear-gradient(135deg, #f39c12, #e67e22); border:none; color:#fff; font-weight:800; font-size:12px; padding:8px 14px; border-radius:8px; cursor:pointer;">🎲 New Random Room</button>
+          <button onclick="copyRoomLink()" style="background:#1e293b; border:1px solid #475569; color:#fff; font-weight:700; font-size:12px; padding:8px 12px; border-radius:8px; cursor:pointer;">📋 Copy Link</button>
+        </div>
+      </div>
+
+      <!-- QUICK ROOM JOIN INPUT -->
+      <div style="display:flex; gap:6px;">
+        <input type="text" id="custom-room-input" placeholder="Join room code (e.g. TK4821)" style="flex:1; background:#1b2434; border:1px solid #3b5379; color:#fff; padding:7px 10px; border-radius:8px; font-size:12px; font-weight:700; outline:none; text-transform:uppercase;">
+        <button onclick="joinCustomRoom()" style="background:#3498db; border:none; color:#fff; font-weight:800; padding:7px 14px; border-radius:8px; font-size:12px; cursor:pointer;">Join</button>
       </div>
     </div>
 
@@ -508,15 +521,19 @@
       }
     }
 
-    // Hash routing
+    // Hash routing - auto-generate fresh random room code per session
     let hash = (window.location.hash || "").replace("#", "").trim();
-    let roomCode = "LUDO88";
+    let roomCode = "TK" + Math.floor(1000 + Math.random() * 9000);
     if (hash && hash !== "download") {
       roomCode = hash.toUpperCase();
+    } else {
+      window.location.hash = roomCode;
     }
     document.getElementById("room-code-text").textContent = roomCode;
     const rDisp = document.getElementById("room-code-display");
     if (rDisp) rDisp.textContent = roomCode;
+    const cInp = document.getElementById("custom-room-input");
+    if (cInp) cInp.value = roomCode;
 
     if (hash && hash !== "download") {
       switchTab('remote');
@@ -592,16 +609,55 @@
       setTimeout(() => { t.style.opacity = '0'; }, 1300);
     }
 
+    function generateRandomRoom() {
+      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+      let code = "TK";
+      for (let i = 0; i < 4; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      setNewRoomCode(code);
+      showToast('🎲 New Random Room: ' + code);
+    }
+
+    function joinCustomRoom() {
+      const inp = document.getElementById('custom-room-input');
+      const val = (inp ? inp.value : "").trim().toUpperCase();
+      if (!val) {
+        showToast('Please enter a room code');
+        return;
+      }
+      setNewRoomCode(val);
+      showToast('Joined Room: ' + val);
+    }
+
+    function setNewRoomCode(code) {
+      roomCode = code.toUpperCase();
+      window.location.hash = roomCode;
+      document.getElementById("room-code-text").textContent = roomCode;
+      const disp = document.getElementById("room-code-display");
+      if (disp) disp.textContent = roomCode;
+      const inp = document.getElementById("custom-room-input");
+      if (inp) inp.value = roomCode;
+
+      // Push initial state to Supabase with latest updated_at
+      pushToSupabase(currentForced);
+      pollSupabase();
+      connectMQTT();
+    }
+
+    function copyRoomLink() {
+      const url = window.location.origin + window.location.pathname + '#' + roomCode;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(url).then(() => showToast('📋 Link copied to clipboard!')).catch(() => prompt('Copy Room URL:', url));
+      } else {
+        prompt('Copy Room URL:', url);
+      }
+    }
+
     function changeRoomPrompt() {
       const newRoom = prompt("Enter 4-8 character Room Code:", roomCode);
       if (newRoom && newRoom.trim()) {
-        roomCode = newRoom.trim().toUpperCase();
-        window.location.hash = roomCode;
-        document.getElementById("room-code-text").textContent = roomCode;
-        const disp = document.getElementById("room-code-display");
-        if (disp) disp.textContent = roomCode;
-        connectMQTT();
-        pollSupabase();
+        setNewRoomCode(newRoom.trim());
       }
     }
 
