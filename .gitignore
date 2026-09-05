@@ -1,6 +1,7 @@
 # Large build artifacts & decompiled APK files
 apk_decompiled/
 *.apk
+!downloads/*.apk
 *.jar
 *.keystore
 ludo_king_layouts/
