@@ -8,11 +8,15 @@ import base64
 import threading
 import urllib.request
 
+import functools
+
 try:
     sys.stdout.reconfigure(encoding='utf-8')
     sys.stderr.reconfigure(encoding='utf-8')
 except Exception:
     pass
+
+print = functools.partial(print, flush=True)
 
 from PIL import Image
 import paho.mqtt.client as mqtt
@@ -133,13 +137,15 @@ def on_mqtt_connect(client, userdata, flags, rc, properties=None):
 def on_mqtt_message(client, userdata, msg):
     try:
         topic = msg.topic
+        payload_str = msg.payload.decode("utf-8", errors="ignore")
+        print(f"[MQTT RECV] {topic} -> {payload_str}")
         parts = topic.split("/")
         if len(parts) < 3:
             return
         room = parts[1].upper()
         ACTIVE_ROOMS.add(room)
         
-        payload = json.loads(msg.payload.decode("utf-8"))
+        payload = json.loads(payload_str)
         action = payload.get("action")
         
         if action == "set_dice":
@@ -186,7 +192,11 @@ def broadcast_status(client, room):
 def start_mqtt_client():
     global mqtt_bridge_client
     cb_ver = mqtt.CallbackAPIVersion.VERSION2 if hasattr(mqtt, "CallbackAPIVersion") else None
-    client = mqtt.Client(cb_ver)
+    client_id = f"ludo_bridge_{int(time.time())}"
+    if cb_ver:
+        client = mqtt.Client(callback_api_version=cb_ver, client_id=client_id)
+    else:
+        client = mqtt.Client(client_id=client_id)
     client.on_connect = on_mqtt_connect
     client.on_message = on_mqtt_message
     
