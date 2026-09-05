@@ -4,21 +4,112 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#0b0f19">
-  <title>Ludo King Universal Cloud Remote</title>
+  <title>Ludo King Suite — Download APK & Cloud Remote Controller</title>
   <!-- MQTT client for zero-config global connection over any network (4G/5G/WiFi) -->
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background: #0b0f19; color: #fff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 12px; }
     
-    .header { text-align: center; margin-bottom: 8px; width: 100%; max-width: 440px; }
-    h1 { font-size: 22px; color: #f1c40f; text-shadow: 0 0 12px rgba(241,196,15,0.4); display: flex; align-items: center; justify-content: center; gap: 8px; }
-    .subtitle { font-size: 13px; color: #8899a6; margin-top: 3px; }
+    .header { text-align: center; margin-bottom: 12px; width: 100%; max-width: 460px; }
+    h1 { font-size: 22px; color: #f1c40f; text-shadow: 0 0 14px rgba(241,196,15,0.4); display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .subtitle { font-size: 13px; color: #8899a6; margin-top: 4px; }
 
-    /* ROOM & STATUS BAR */
+    /* NAVIGATION PILL TABS */
+    .nav-tabs {
+      display: flex; background: #141b2b; border: 1.5px solid #223049; border-radius: 30px;
+      padding: 4px; width: 100%; max-width: 460px; margin-bottom: 14px;
+    }
+    .nav-tab {
+      flex: 1; text-align: center; padding: 10px 0; font-size: 13px; font-weight: 800;
+      color: #8899a6; border-radius: 26px; cursor: pointer; transition: all 0.2s ease;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .nav-tab.active {
+      background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+      color: #fff; box-shadow: 0 4px 14px rgba(243,156,18,0.4);
+    }
+
+    .container { width: 100%; max-width: 460px; display: flex; flex-direction: column; gap: 12px; }
+    .card { background: #141b2b; border: 1.5px solid #223049; border-radius: 14px; padding: 16px; box-shadow: 0 6px 18px rgba(0,0,0,0.5); }
+    .section-title { font-size: 12px; color: #9bb0c1; text-transform: uppercase; font-weight: 800; letter-spacing: 0.8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+
+    /* ================= DOWNLOAD TAB STYLES ================= */
+    .hero-card {
+      background: linear-gradient(180deg, #162137 0%, #101624 100%);
+      border: 1.5px solid #2e4161; border-radius: 16px; padding: 22px 18px; text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .hero-card::before {
+      content: ""; position: absolute; top: -50px; left: 50%; transform: translateX(-50%);
+      width: 180px; height: 180px; background: radial-gradient(circle, rgba(241,196,15,0.18) 0%, rgba(241,196,15,0) 70%);
+      pointer-events: none;
+    }
+    .apk-icon {
+      width: 72px; height: 72px; border-radius: 18px; margin: 0 auto 12px auto;
+      background: linear-gradient(135deg, #f1c40f, #e67e22); display: flex;
+      align-items: center; justify-content: center; font-size: 38px;
+      box-shadow: 0 8px 24px rgba(241,196,15,0.4); border: 2px solid #f9e79f;
+    }
+    .apk-title { font-size: 19px; font-weight: 900; color: #fff; margin-bottom: 4px; }
+    .apk-tagline { font-size: 12px; color: #9bb0c1; margin-bottom: 14px; }
+    .apk-badges { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+    .badge {
+      background: rgba(46,204,113,0.15); border: 1px solid rgba(46,204,113,0.4);
+      color: #2ecc71; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 14px;
+    }
+    .badge.gold {
+      background: rgba(241,196,15,0.15); border-color: rgba(241,196,15,0.4); color: #f1c40f;
+    }
+
+    .btn-download-primary {
+      display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%;
+      background: linear-gradient(180deg, #2ecc71 0%, #27ae60 100%);
+      color: #fff; font-size: 16px; font-weight: 900; padding: 15px; border-radius: 12px;
+      border: 2px solid #2ecc71; text-decoration: none; cursor: pointer;
+      box-shadow: 0 6px 20px rgba(46,204,113,0.4); transition: transform 0.15s ease;
+      margin-bottom: 10px;
+    }
+    .btn-download-primary:active { transform: scale(0.98); }
+    .btn-download-mirror {
+      display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+      background: #1c273c; border: 1.5px solid #3b5379; color: #ecf0f1; font-size: 13px;
+      font-weight: 700; padding: 12px; border-radius: 10px; text-decoration: none;
+      transition: background 0.15s;
+    }
+    .btn-download-mirror:hover { background: #24344f; }
+
+    .specs-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; text-align: left;
+    }
+    .spec-item {
+      background: rgba(11,15,25,0.6); border: 1px solid #223049; border-radius: 10px;
+      padding: 10px 12px;
+    }
+    .spec-label { font-size: 11px; color: #7f8c8d; text-transform: uppercase; font-weight: 700; }
+    .spec-value { font-size: 13px; color: #ecf0f1; font-weight: 800; margin-top: 2px; }
+
+    .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .feature-box {
+      background: #101624; border: 1px solid #223049; border-radius: 10px; padding: 12px;
+    }
+    .feature-box h4 { font-size: 13px; color: #f1c40f; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+    .feature-box p { font-size: 11px; color: #8899a6; line-height: 1.4; }
+
+    .steps-list { display: flex; flex-direction: column; gap: 10px; }
+    .step-row { display: flex; align-items: flex-start; gap: 12px; }
+    .step-num {
+      background: #f39c12; color: #0b0f19; width: 24px; height: 24px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 12px;
+      flex-shrink: 0; margin-top: 2px;
+    }
+    .step-text { font-size: 12px; color: #d0d8e2; line-height: 1.4; }
+    .step-text strong { color: #fff; }
+
+    /* ================= REMOTE TAB STYLES ================= */
     .room-bar {
       display: flex; justify-content: space-between; align-items: center; background: #141b2b;
-      border: 1.5px solid #223049; border-radius: 12px; padding: 8px 14px; width: 100%; max-width: 440px; margin-bottom: 10px;
+      border: 1.5px solid #223049; border-radius: 12px; padding: 8px 14px; width: 100%; margin-bottom: 2px;
     }
     .status-indicator { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; }
     .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
@@ -31,11 +122,6 @@
       background: rgba(241,196,15,0.1); border: 1px solid rgba(241,196,15,0.3); padding: 4px 10px; border-radius: 8px;
     }
 
-    .container { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 12px; }
-    .card { background: #141b2b; border: 1.5px solid #223049; border-radius: 14px; padding: 14px; box-shadow: 0 6px 18px rgba(0,0,0,0.5); }
-    .section-title { font-size: 12px; color: #9bb0c1; text-transform: uppercase; font-weight: 800; letter-spacing: 0.8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-
-    /* DICE RIG CONTROLLER */
     .dice-rig-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-bottom: 8px; }
     .btn-dice-num {
       background: #1c273c; border: 2px solid #2e4161; color: #fff; font-size: 20px; font-weight: 900;
@@ -56,7 +142,6 @@
       box-shadow: 0 0 14px rgba(46,204,113,0.6);
     }
 
-    /* QUICK ROLL SHORTCUTS */
     .roll-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .roll-btn {
       color: #fff; font-size: 12px; font-weight: 800; padding: 11px 8px; border-radius: 10px; cursor: pointer;
@@ -80,7 +165,6 @@
     }
     .roll-btn:active { transform: scale(0.96); }
 
-    /* SCREEN MIRROR */
     .screen-preview-container {
       position: relative; width: 100%; min-height: 480px; background: #000; border-radius: 12px;
       overflow: hidden; border: 2px solid #2e4161; margin-top: 4px; cursor: crosshair;
@@ -99,7 +183,6 @@
       100% { transform: translate(-50%, -50%) scale(1.6); opacity: 0; }
     }
 
-    /* TOAST */
     .toast {
       position: fixed; bottom: 20px; background: rgba(15,20,30,0.95); border: 1px solid #f1c40f;
       color: #fff; padding: 10px 20px; border-radius: 24px; font-size: 13px; font-weight: bold;
@@ -111,25 +194,132 @@
       border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer;
     }
     .action-btn:hover { background: #253552; }
+
+    .view-section { display: none; width: 100%; }
+    .view-section.active { display: flex; flex-direction: column; gap: 12px; }
   </style>
 </head>
 <body>
   <div class="header">
-    <h1>🎲 Ludo King Remote</h1>
-    <div class="subtitle">Cloud Remote Pad & Universal Dice Controller</div>
+    <h1>🎲 Ludo King Pro Suite</h1>
+    <div class="subtitle">Remote Controller & Mod APK Hub</div>
   </div>
 
-  <div class="room-bar">
-    <div class="status-indicator">
-      <span class="dot connecting" id="status-dot"></span>
-      <span id="status-text">Connecting to Cloud...</span>
+  <!-- NAVIGATION TABS -->
+  <div class="nav-tabs">
+    <div class="nav-tab active" id="tab-download-btn" onclick="switchTab('download')">
+      <span>📥 Download APK</span>
     </div>
-    <div class="room-code-badge" onclick="changeRoomPrompt()" title="Tap to change room code">
-      🔑 Room: <span id="room-code-text">LUDO88</span> ✏️
+    <div class="nav-tab" id="tab-remote-btn" onclick="switchTab('remote')">
+      <span>🎮 Web Remote</span>
     </div>
   </div>
 
-  <div class="container">
+  <!-- ==================== VIEW 1: DOWNLOAD APK ==================== -->
+  <div class="view-section active" id="view-download">
+    <div class="hero-card">
+      <div class="apk-icon">🎲</div>
+      <div class="apk-title">Ludo King: Remote Controlled Edition</div>
+      <div class="apk-tagline">Integrated Wireless Broadcast Hook & Dice Rigging Architecture</div>
+      <div class="apk-badges">
+        <span class="badge gold">v8.0.0.x Patched</span>
+        <span class="badge">Signed APK</span>
+        <span class="badge">No Root Needed</span>
+      </div>
+
+      <!-- DIRECT DOWNLOAD BUTTON -->
+      <a href="/downloads/Ludo_King_Remote_Controlled.apk" download="Ludo_King_Remote_Controlled.apk" class="btn-download-primary" id="btn-primary-dl">
+        <span>📥 Download APK (Direct)</span>
+        <span style="font-size:12px; opacity:0.85;">(55.2 MB)</span>
+      </a>
+
+      <!-- FAST GITHUB CDN MIRROR BUTTON -->
+      <a href="https://github.com/takaisbjehei/ludo-king-remote/releases/download/v1.0.0/Ludo_King_Remote_Controlled.apk" class="btn-download-mirror" target="_blank">
+        <span>⚡ High-Speed Mirror (GitHub CDN)</span>
+      </a>
+
+      <!-- SPECIFICATIONS -->
+      <div class="specs-grid">
+        <div class="spec-item">
+          <div class="spec-label">File Size</div>
+          <div class="spec-value">55.2 MB</div>
+        </div>
+        <div class="spec-item">
+          <div class="spec-label">Package</div>
+          <div class="spec-value">com.ludo.king</div>
+        </div>
+        <div class="spec-item">
+          <div class="spec-label">Compatibility</div>
+          <div class="spec-value">Android 5.0+</div>
+        </div>
+        <div class="spec-item">
+          <div class="spec-label">Architecture</div>
+          <div class="spec-value">All Devices / BlueStacks</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FEATURES -->
+    <div class="card">
+      <div class="section-title">⚡ Exclusive Mod Features</div>
+      <div class="feature-grid">
+        <div class="feature-box">
+          <h4>🎯 Universal Dice Rig</h4>
+          <p>Force any number from 1 to 6 on any player's turn with 100% precision.</p>
+        </div>
+        <div class="feature-box">
+          <h4>🌐 Cloud Wireless Remote</h4>
+          <p>Control from any phone, iPhone, or PC over 4G/5G mobile data using Room Codes.</p>
+        </div>
+        <div class="feature-box">
+          <h4>📺 Live Screen Mirror</h4>
+          <p>View emulator screen in real-time and tap directly on screen to click the game.</p>
+        </div>
+        <div class="feature-box">
+          <h4>🎲 Fair Mode Switch</h4>
+          <p>One-click "RANDOM" button instantly restores original game dice math.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- INSTALLATION INSTRUCTIONS -->
+    <div class="card">
+      <div class="section-title">📖 3-Step Setup Guide</div>
+      <div class="steps-list">
+        <div class="step-row">
+          <div class="step-num">1</div>
+          <div class="step-text">
+            <strong>Install APK:</strong> Download and install <code>Ludo_King_Remote_Controlled.apk</code>. (Uninstall any existing version first).
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num">2</div>
+          <div class="step-text">
+            <strong>Run Host Bridge:</strong> On the PC hosting your emulator, run <code>python adb_remote_server.py</code>.
+          </div>
+        </div>
+        <div class="step-row">
+          <div class="step-num">3</div>
+          <div class="step-text">
+            <strong>Open Web Remote:</strong> Switch to the <strong>Web Remote</strong> tab or open on your phone to command your match!
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== VIEW 2: WEB REMOTE CONTROLLER ==================== -->
+  <div class="view-section" id="view-remote">
+    <div class="room-bar">
+      <div class="status-indicator">
+        <span class="dot connecting" id="status-dot"></span>
+        <span id="status-text">Connecting to Cloud...</span>
+      </div>
+      <div class="room-code-badge" onclick="changeRoomPrompt()" title="Tap to change room code">
+        🔑 Room: <span id="room-code-text">LUDO88</span> ✏️
+      </div>
+    </div>
+
     <!-- DICE RIG CARD -->
     <div class="card">
       <div class="section-title">
@@ -176,8 +366,40 @@
   <div class="toast" id="toast">Command sent</div>
 
   <script>
-    let roomCode = (window.location.hash || "").replace("#", "").trim().toUpperCase() || "LUDO88";
+    // Tab switching logic
+    function switchTab(tab) {
+      const dlBtn = document.getElementById('tab-download-btn');
+      const remBtn = document.getElementById('tab-remote-btn');
+      const dlView = document.getElementById('view-download');
+      const remView = document.getElementById('view-remote');
+
+      if (tab === 'remote') {
+        dlBtn.classList.remove('active');
+        remBtn.classList.add('active');
+        dlView.classList.remove('active');
+        remView.classList.add('active');
+        window.location.hash = roomCode;
+        if (!mqttClient) connectMQTT();
+      } else {
+        remBtn.classList.remove('active');
+        dlBtn.classList.add('active');
+        remView.classList.remove('active');
+        dlView.classList.add('active');
+        window.location.hash = 'download';
+      }
+    }
+
+    // Hash routing
+    let hash = (window.location.hash || "").replace("#", "").trim();
+    let roomCode = "LUDO88";
+    if (hash && hash !== "download") {
+      roomCode = hash.toUpperCase();
+    }
     document.getElementById("room-code-text").textContent = roomCode;
+
+    if (hash && hash !== "download") {
+      switchTab('remote');
+    }
 
     let mqttClient = null;
     let isConnected = false;
@@ -220,8 +442,8 @@
 
       const statusDot = document.getElementById('status-dot');
       const statusText = document.getElementById('status-text');
-      statusDot.className = 'dot connecting';
-      statusText.textContent = 'Connecting...';
+      if (statusDot) statusDot.className = 'dot connecting';
+      if (statusText) statusText.textContent = 'Connecting...';
 
       const brokerUrl = "wss://broker.emqx.io:8084/mqtt";
       const clientId = "ludo_web_" + Math.random().toString(16).substring(2, 10);
@@ -234,8 +456,8 @@
       });
 
       mqttClient.on('connect', () => {
-        statusDot.className = 'dot connecting';
-        statusText.textContent = 'Cloud OK, reaching PC...';
+        if (statusDot) statusDot.className = 'dot connecting';
+        if (statusText) statusText.textContent = 'Cloud OK, reaching PC...';
         isConnected = true;
 
         mqttClient.subscribe(`ludo/${roomCode}/resp`);
@@ -250,21 +472,23 @@
         if (topic === `ludo/${roomCode}/screen`) {
           const img = document.getElementById('screen-img');
           const placeholder = document.getElementById('screen-placeholder');
-          img.src = 'data:image/jpeg;base64,' + payload.toString();
-          img.style.display = 'block';
-          placeholder.style.display = 'none';
+          if (img && placeholder) {
+            img.src = 'data:image/jpeg;base64,' + payload.toString();
+            img.style.display = 'block';
+            placeholder.style.display = 'none';
+          }
         } else if (topic === `ludo/${roomCode}/status`) {
           try {
             const data = JSON.parse(payload.toString());
             if (data.online) {
-              statusDot.className = 'dot connected';
-              statusText.textContent = '● PC Bridge Online';
+              if (statusDot) statusDot.className = 'dot connected';
+              if (statusText) statusText.textContent = '● PC Bridge Online';
               if (data.forced_dice !== undefined && data.forced_dice !== currentForced) {
                 updateDiceUI(data.forced_dice);
               }
             } else {
-              statusDot.className = 'dot connecting';
-              statusText.textContent = 'Waiting for Emulator...';
+              if (statusDot) statusDot.className = 'dot connecting';
+              if (statusText) statusText.textContent = 'Waiting for Emulator...';
             }
           } catch(e) {}
         } else if (topic === `ludo/${roomCode}/resp`) {
@@ -275,14 +499,14 @@
         }
       });
 
-      mqttClient.on('error', (err) => {
-        statusDot.className = 'dot disconnected';
-        statusText.textContent = '⚠️ Cloud Error';
+      mqttClient.on('error', () => {
+        if (statusDot) statusDot.className = 'dot disconnected';
+        if (statusText) statusText.textContent = '⚠️ Cloud Error';
       });
 
       mqttClient.on('offline', () => {
-        statusDot.className = 'dot disconnected';
-        statusText.textContent = '⚠️ Cloud Offline';
+        if (statusDot) statusDot.className = 'dot disconnected';
+        if (statusText) statusText.textContent = '⚠️ Cloud Offline';
       });
     }
 
@@ -335,10 +559,13 @@
       showToast('Refreshing screen...');
     }
 
+    // Connect immediately in background
     connectMQTT();
-    // Auto-poll screen every 2.5 seconds
+
+    // Auto-poll screen every 2.5 seconds when remote tab is open
     setInterval(() => {
-      if (mqttClient && mqttClient.connected) {
+      const remView = document.getElementById('view-remote');
+      if (remView.classList.contains('active') && mqttClient && mqttClient.connected) {
         sendCommand({ action: "get_screen" });
       }
     }, 2500);

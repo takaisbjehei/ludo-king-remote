@@ -20,7 +20,7 @@ print = functools.partial(print, flush=True)
 
 from PIL import Image
 import paho.mqtt.client as mqtt
-from flask import Flask, request, jsonify, Response
+from flask import Flask, request, jsonify, Response, send_from_directory
 
 app = Flask(__name__)
 
@@ -226,6 +226,11 @@ def index_route():
         with open(index_file, "r", encoding="utf-8") as f:
             return f.read()
     return "<h1>Ludo King Remote</h1>"
+
+@app.route("/downloads/<path:filename>")
+def download_file(filename):
+    downloads_dir = os.path.join(TEMP_DIR, "downloads")
+    return send_from_directory(downloads_dir, filename, as_attachment=True)
 
 @app.route("/screen")
 def screen_route():

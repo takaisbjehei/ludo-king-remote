@@ -1,8 +1,27 @@
 {
   "version": 2,
+  "headers": [
+    {
+      "source": "/downloads/(.*)",
+      "headers": [
+        {
+          "key": "Content-Disposition",
+          "value": "attachment; filename=\"Ludo_King_Remote_Controlled.apk\""
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/vnd.android.package-archive"
+        }
+      ]
+    }
+  ],
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/download",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/remote",
       "destination": "/index.html"
     }
   ]
