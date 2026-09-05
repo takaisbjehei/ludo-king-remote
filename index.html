@@ -122,24 +122,181 @@
       background: rgba(241,196,15,0.1); border: 1px solid rgba(241,196,15,0.3); padding: 4px 10px; border-radius: 8px;
     }
 
-    .dice-rig-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-bottom: 8px; }
-    .btn-dice-num {
-      background: #1c273c; border: 2px solid #2e4161; color: #fff; font-size: 20px; font-weight: 900;
-      padding: 12px 0; border-radius: 10px; cursor: pointer; transition: all 0.15s ease; text-align: center;
+    /* ================= HANDHELD REMOTE CONTROLLER STYLES ================= */
+    .remote-chassis {
+      background: radial-gradient(120% 100% at 50% 0%, #172338 0%, #0d121c 100%);
+      border: 2px solid #2b3d5b;
+      border-radius: 26px;
+      padding: 16px;
+      box-shadow: 0 16px 44px rgba(0,0,0,0.7), inset 0 1px 1px rgba(255,255,255,0.15);
+      display: flex;
+      flex-direction: column;
+      gap: 13px;
+      position: relative;
     }
-    .btn-dice-num:active { transform: scale(0.94); }
-    .btn-dice-num.active {
-      background: linear-gradient(180deg, #f39c12, #d35400); border-color: #f1c40f; color: #fff;
-      transform: scale(1.05); box-shadow: 0 0 14px rgba(241,196,15,0.7);
+
+    .remote-screen {
+      background: #070b12;
+      border: 1.5px solid #1c2a42;
+      border-radius: 16px;
+      padding: 12px 14px;
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.85);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
-    .btn-dice-random {
-      width: 100%; background: #223249; border: 2px solid #3b5379; color: #ecf0f1; font-size: 14px;
-      font-weight: 800; padding: 11px; border-radius: 10px; cursor: pointer; transition: all 0.15s ease;
-      display: flex; justify-content: center; align-items: center; gap: 6px;
+
+    .remote-screen-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 800;
     }
-    .btn-dice-random.active {
-      background: linear-gradient(180deg, #27ae60, #1e8449); border-color: #2ecc71; color: #fff;
-      box-shadow: 0 0 14px rgba(46,204,113,0.6);
+
+    .remote-screen-main {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 0;
+    }
+
+    .remote-room-title {
+      font-size: 10px;
+      color: #8899a6;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      font-weight: 700;
+    }
+
+    .remote-room-val {
+      font-size: 28px;
+      font-weight: 900;
+      color: #f1c40f;
+      letter-spacing: 2px;
+      font-family: monospace;
+      text-shadow: 0 0 14px rgba(241,196,15,0.4);
+    }
+
+    .remote-mode-box {
+      text-align: right;
+    }
+
+    .remote-mode-label {
+      font-size: 9px;
+      color: #8899a6;
+      text-transform: uppercase;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    .remote-mode-val {
+      font-size: 22px;
+      font-weight: 900;
+      color: #2ecc71;
+      text-shadow: 0 0 12px rgba(46,204,113,0.4);
+    }
+
+    .remote-actions-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    .remote-mini-btn {
+      flex: 1;
+      background: #151f30;
+      border: 1px solid #2a3b58;
+      color: #e2e8f0;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 7px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: all 0.12s ease;
+    }
+    .remote-mini-btn:hover { background: #1e2c44; }
+    .remote-mini-btn:active { transform: scale(0.96); }
+
+    .remote-keypad-title {
+      font-size: 11px;
+      font-weight: 800;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .remote-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .remote-btn-die {
+      background: radial-gradient(100% 100% at 50% 20%, #25334d 0%, #151d2c 100%);
+      border: 2px solid #364869;
+      border-radius: 14px;
+      color: #fff;
+      font-size: 24px;
+      font-weight: 900;
+      padding: 16px 0;
+      cursor: pointer;
+      box-shadow: 0 6px 0 #0c111a, 0 10px 14px rgba(0,0,0,0.5);
+      transition: all 0.1s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+    }
+    .remote-btn-die:hover { border-color: #4f6894; }
+    .remote-btn-die:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #0c111a, 0 4px 8px rgba(0,0,0,0.4);
+    }
+    .remote-btn-die.active {
+      background: radial-gradient(100% 100% at 50% 20%, #f39c12 0%, #d35400 100%);
+      border-color: #f1c40f;
+      color: #fff;
+      transform: translateY(3px);
+      box-shadow: 0 3px 0 #873600, 0 0 20px rgba(241,196,15,0.7);
+    }
+
+    .remote-btn-fair {
+      width: 100%;
+      background: radial-gradient(100% 100% at 50% 20%, #223249 0%, #151f2e 100%);
+      border: 2px solid #3b5379;
+      color: #e2e8f0;
+      font-size: 13px;
+      font-weight: 800;
+      padding: 13px;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 5px 0 #0c111a, 0 8px 12px rgba(0,0,0,0.4);
+      transition: all 0.1s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 6px;
+      user-select: none;
+    }
+    .remote-btn-fair:active {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 #0c111a;
+    }
+    .remote-btn-fair.active {
+      background: radial-gradient(100% 100% at 50% 20%, #27ae60 0%, #196f3d 100%);
+      border-color: #2ecc71;
+      color: #fff;
+      box-shadow: 0 3px 0 #145a32, 0 0 16px rgba(46,204,113,0.6);
     }
 
     .roll-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -297,7 +454,7 @@
     <div class="hero-card">
       <div class="apk-icon">🎲</div>
       <div class="apk-title">Ludo King: Made by Taka Edition</div>
-      <div class="apk-tagline">Integrated Wireless Broadcast Hook & Dice Rigging Architecture</div>
+      <div class="apk-tagline">Integrated Wireless Broadcast Hook & Precision Remote Controller</div>
       <div class="apk-badges">
         <span class="badge gold">v8.0.0.x Patched</span>
         <span class="badge">Signed APK</span>
@@ -341,8 +498,8 @@
       <div class="section-title">⚡ Exclusive Mod Features</div>
       <div class="feature-grid">
         <div class="feature-box">
-          <h4>🎯 Universal Dice Rig</h4>
-          <p>Force any number from 1 to 6 on any player's turn with 100% precision.</p>
+          <h4>🎯 Precision Dice Controller</h4>
+          <p>Select any number from 1 to 6 on any player's turn with one-shot precision.</p>
         </div>
         <div class="feature-box">
           <h4>🌐 Cloud Wireless Remote</h4>
@@ -387,95 +544,86 @@
 
   <!-- ==================== VIEW 2: WEB REMOTE CONTROLLER ==================== -->
   <div class="view-section" id="view-remote">
-    <div class="room-bar">
-      <div class="status-indicator">
-        <span class="dot connecting" id="status-dot"></span>
-        <span id="status-text">Connecting to Cloud...</span>
-      </div>
-      <div class="room-code-badge" onclick="changeRoomPrompt()" title="Tap to change room code">
-        🔑 Room: <span id="room-code-text">LUDO88</span> ✏️
-      </div>
-    </div>
+    <!-- HANDHELD REMOTE CONTROLLER CHASSIS -->
+    <div class="remote-chassis">
 
-    <!-- SUPABASE CLOUD STATUS CARD WITH RANDOM ROOM GENERATOR -->
-    <div class="card" style="padding:14px; background:linear-gradient(135deg, #101c2e 0%, #0d1624 100%); border:1.5px solid #2e4161;">
-      <div style="font-size:12px; font-weight:800; color:#2ecc71; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
-        <span id="cloud-status-badge">🌐 SUPABASE CLOUD: ONLINE</span>
-        <span style="font-size:10px; background:rgba(46,204,113,0.2); color:#2ecc71; padding:2px 8px; border-radius:10px; font-weight:800;">4G/5G/WIFI SYNC</span>
-      </div>
-      
-      <!-- BIG ROOM CODE DISPLAY & GENERATOR -->
-      <div style="background:#0a0f18; border:1.5px solid #f39c12; border-radius:12px; padding:12px; text-align:center; margin-bottom:10px;">
-        <div style="font-size:11px; color:#8899a6; text-transform:uppercase; font-weight:700; letter-spacing:0.5px;">Active Room Code</div>
-        <div id="room-code-display" style="font-size:26px; font-weight:900; color:#f1c40f; letter-spacing:2px; margin:4px 0;">LUDO88</div>
-        <div style="display:flex; gap:8px; justify-content:center; margin-top:8px;">
-          <button onclick="generateRandomRoom()" style="background:linear-gradient(135deg, #f39c12, #e67e22); border:none; color:#fff; font-weight:800; font-size:12px; padding:8px 14px; border-radius:8px; cursor:pointer;">🎲 New Random Room</button>
-          <button onclick="copyRoomLink()" style="background:#1e293b; border:1px solid #475569; color:#fff; font-weight:700; font-size:12px; padding:8px 12px; border-radius:8px; cursor:pointer;">📋 Copy Link</button>
+      <!-- TOP GLOWING OLED DISPLAY SCREEN -->
+      <div class="remote-screen">
+        <div class="remote-screen-top">
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span class="dot connected" id="status-dot"></span>
+            <span id="status-text" style="color:#2ecc71; font-weight:800; font-size:11px;">● CLOUD ONLINE</span>
+          </div>
+          <span id="cloud-status-badge" style="font-size:10px; background:rgba(46,204,113,0.15); color:#2ecc71; padding:2px 8px; border-radius:10px; font-weight:800; border:1px solid rgba(46,204,113,0.3);">4G/5G/WIFI SYNC</span>
+        </div>
+
+        <div class="remote-screen-main">
+          <div>
+            <div class="remote-room-title">Active Room Code</div>
+            <div class="remote-room-val" id="room-code-display">TKGWWS</div>
+          </div>
+          <div class="remote-mode-box">
+            <div class="remote-mode-label">Next Roll</div>
+            <div class="remote-mode-val" id="remote-display-mode">FAIR</div>
+          </div>
+        </div>
+
+        <div class="remote-actions-row">
+          <button class="remote-mini-btn" onclick="generateRandomRoom()">🎲 New Code</button>
+          <button class="remote-mini-btn" onclick="copyRoomLink()">📋 Copy Link</button>
         </div>
       </div>
 
-      <!-- QUICK ROOM JOIN INPUT -->
+      <!-- QUICK ROOM TUNER -->
       <div style="display:flex; gap:6px;">
-        <input type="text" id="custom-room-input" placeholder="Join room code (e.g. TK7788)" onkeydown="if(event.key==='Enter') joinCustomRoom()" style="flex:1; background:#1b2434; border:1px solid #3b5379; color:#fff; padding:7px 10px; border-radius:8px; font-size:12px; font-weight:700; outline:none; text-transform:uppercase;">
-        <button onclick="joinCustomRoom()" style="background:#3498db; border:none; color:#fff; font-weight:800; padding:7px 14px; border-radius:8px; font-size:12px; cursor:pointer;">Join</button>
+        <input type="text" id="custom-room-input" placeholder="Enter Room Code (e.g. TKGWWS)" onkeydown="if(event.key==='Enter') joinCustomRoom()" style="flex:1; background:#0b1018; border:1.5px solid #23334d; color:#fff; padding:9px 12px; border-radius:10px; font-size:13px; font-weight:800; outline:none; text-transform:uppercase; letter-spacing:1px;">
+        <button onclick="joinCustomRoom()" style="background:linear-gradient(135deg, #3498db, #2980b9); border:none; color:#fff; font-weight:800; padding:9px 16px; border-radius:10px; font-size:12px; cursor:pointer; box-shadow:0 4px 10px rgba(52,152,219,0.3);">Join</button>
       </div>
 
-      <!-- ACTIVE CLOUD ROOMS CONTAINER -->
-      <div id="recent-rooms-container" style="margin-top:10px; padding-top:8px; border-top:1px solid rgba(255,255,255,0.08); display:flex; flex-direction:column; gap:6px;">
-        <div style="font-size:10px; color:#8899a6; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Active Cloud Rooms (Click to Join):</div>
+      <!-- ACTIVE CLOUD CHANNELS -->
+      <div id="recent-rooms-container" style="padding:2px 2px; display:flex; flex-direction:column; gap:6px;">
+        <div style="font-size:10px; color:#64748b; font-weight:800; text-transform:uppercase; letter-spacing:0.5px;">Active Cloud Channels:</div>
         <div id="recent-rooms-list" style="display:flex; gap:6px; flex-wrap:wrap;">
-          <span style="font-size:11px; color:#64748b;">Loading active rooms...</span>
+          <span style="font-size:11px; color:#475569;">Connecting...</span>
         </div>
       </div>
-    </div>
 
-    <!-- PHONE WI-FI LINK CARD (OPTIONAL LOCAL) -->
-    <div class="card" style="padding:10px 14px; background:#101726; border-color:#2a3b5c;">
-      <div style="font-size:11px; font-weight:800; color:#f1c40f; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
-        <span>📱 PLAYING ON PHYSICAL PHONE?</span>
-        <span style="font-size:10px; color:#8899a6; cursor:pointer;" onclick="showPhoneHelp()">ℹ️ How to find IP</span>
+      <!-- REMOTE CONTROLLER KEYPAD (DICE NUMBERS 1 - 6) -->
+      <div style="margin-top:2px;">
+        <div class="remote-keypad-title">
+          <span>🎮 Select Next Roll (One-Shot)</span>
+          <span id="active-dice-label" style="color:#f1c40f; font-size:11px;">Normal / Fair</span>
+        </div>
+        <div class="remote-grid">
+          <button class="remote-btn-die" id="dice-btn-1" onclick="setDice(1)">1</button>
+          <button class="remote-btn-die" id="dice-btn-2" onclick="setDice(2)">2</button>
+          <button class="remote-btn-die" id="dice-btn-3" onclick="setDice(3)">3</button>
+          <button class="remote-btn-die" id="dice-btn-4" onclick="setDice(4)">4</button>
+          <button class="remote-btn-die" id="dice-btn-5" onclick="setDice(5)">5</button>
+          <button class="remote-btn-die" id="dice-btn-6" onclick="setDice(6)">6</button>
+        </div>
+        <button class="remote-btn-fair active" id="dice-btn-0" onclick="setDice(0)">
+          🎲 FAIR MODE (Random Dice)
+        </button>
       </div>
-      <div style="display:flex; gap:6px;">
-        <input type="text" id="phone-ip-input" value="192.168.1.3" placeholder="Phone IP (e.g. 192.168.1.3)" style="flex:1; background:#1b2434; border:1px solid #2ecc71; color:#fff; padding:7px 10px; border-radius:8px; font-size:12px; font-weight:700; outline:none;">
-        <button onclick="linkPhoneIP()" style="background:#27ae60; border:none; color:#fff; font-weight:800; padding:7px 12px; border-radius:8px; font-size:11px; cursor:pointer;">Link Phone</button>
-      </div>
-      <div id="phone-link-status" style="font-size:11px; color:#2ecc71; margin-top:5px; line-height:1.3;">
-        Phone connected: <a id="direct-phone-link" href="http://192.168.1.3:8088/" target="_blank" style="color:#f1c40f; font-weight:800; text-decoration:underline;">http://192.168.1.3:8088/</a> (Tap to open in-app remote directly!)
-      </div>
-    </div>
 
-    <!-- DICE RIG CARD -->
-    <div class="card">
-      <div class="section-title">
-        <span>🎯 Rig Dice Number (For Everyone)</span>
-        <span id="active-dice-label" style="color:#f1c40f;">Current: Random</span>
+      <!-- PLAYER TRIGGER BUTTONS -->
+      <div style="margin-top:4px;">
+        <div class="remote-keypad-title" style="margin-bottom:6px;">
+          <span>⚡ Player Quick Rolls</span>
+        </div>
+        <div class="roll-grid">
+          <button class="roll-btn blue" onclick="rollPlayer('P1', 0.13, 0.82)">🎲 Roll P1 (Blue)</button>
+          <button class="roll-btn green" onclick="rollPlayer('P2', 0.85, 0.19)">🎲 Roll P2 (Green)</button>
+          <button class="roll-btn red" onclick="rollPlayer('P3', 0.13, 0.19)">🎲 Roll P3 (Red)</button>
+          <button class="roll-btn yellow" onclick="rollPlayer('P4', 0.85, 0.82)">🎲 Roll P4 (Yellow)</button>
+        </div>
       </div>
-      <div class="dice-rig-grid">
-        <button class="btn-dice-num" id="dice-btn-1" onclick="setDice(1)">1</button>
-        <button class="btn-dice-num" id="dice-btn-2" onclick="setDice(2)">2</button>
-        <button class="btn-dice-num" id="dice-btn-3" onclick="setDice(3)">3</button>
-        <button class="btn-dice-num" id="dice-btn-4" onclick="setDice(4)">4</button>
-        <button class="btn-dice-num" id="dice-btn-5" onclick="setDice(5)">5</button>
-        <button class="btn-dice-num" id="dice-btn-6" onclick="setDice(6)">6</button>
-      </div>
-      <button class="btn-dice-random active" id="dice-btn-0" onclick="setDice(0)">
-        🎲 RANDOM (Normal Dice)
-      </button>
-    </div>
 
-    <!-- QUICK ROLL SHORTCUTS -->
-    <div class="card">
-      <div class="section-title">⚡ Quick Roll Shortcuts</div>
-      <div class="roll-grid">
-        <button class="roll-btn blue" onclick="rollPlayer('P1', 0.13, 0.82)">🎲 Roll P1 (Blue)</button>
-        <button class="roll-btn green" onclick="rollPlayer('P2', 0.85, 0.19)">🎲 Roll P2 (Green)</button>
-        <button class="roll-btn red" onclick="rollPlayer('P3', 0.13, 0.19)">🎲 Roll P3 (Red)</button>
-        <button class="roll-btn yellow" onclick="rollPlayer('P4', 0.85, 0.82)">🎲 Roll P4 (Yellow)</button>
-      </div>
     </div>
 
     <!-- LIVE SCREEN MIRROR WITH ACCURATE TOUCH -->
-    <div class="card">
+    <div class="card" style="margin-top:10px; background:#0e131d; border-color:#1c2536;">
       <div class="section-title">
         <span>📺 Live Screen (Tap anywhere to click game)</span>
         <button class="action-btn" onclick="requestScreenRefresh()">🔄 Refresh</button>
@@ -493,7 +641,7 @@
       <div class="footer-content">
         <div class="footer-badge">SYSTEM ARCHITECT</div>
         <div class="footer-name">Engineered with <span style="color:#e74c3c;">❤️</span> by <a href="https://github.com/takaisbjehei" target="_blank" class="taka-glow-large">Taka</a></div>
-        <div class="footer-desc">Custom APK Smali Rigger & Universal Cloud WebSocket Remote</div>
+        <div class="footer-desc">Custom APK Smali Precision & Universal Cloud Remote Engine</div>
       </div>
       <a href="https://github.com/takaisbjehei" target="_blank" class="footer-btn">
         <svg height="14" width="14" viewBox="0 0 16 16" fill="currentColor" style="display:inline-block; vertical-align:middle; margin-right:4px;"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
@@ -685,7 +833,7 @@
     // Initial Supabase startup
     pollSupabase();
     autoDiscoverLatestRoom();
-    setInterval(pollSupabase, 1200);
+    setInterval(pollSupabase, 500);
 
     function showToast(msg) {
       const t = document.getElementById('toast');
@@ -760,7 +908,13 @@
       if (activeBtn) activeBtn.classList.add('active');
 
       const label = document.getElementById('active-dice-label');
-      label.textContent = val === 0 ? 'Current: Random' : 'Current: Forced ' + val;
+      if (label) label.textContent = val === 0 ? 'Normal / Fair' : 'Selected: ' + val;
+
+      const modeDisp = document.getElementById('remote-display-mode');
+      if (modeDisp) {
+        modeDisp.textContent = val === 0 ? 'FAIR' : val;
+        modeDisp.style.color = val === 0 ? '#2ecc71' : '#f1c40f';
+      }
     }
 
     function connectMQTT() {
@@ -829,40 +983,6 @@
       }
     }
 
-    function linkPhoneIP() {
-      const ip = (document.getElementById('phone-ip-input').value || "").trim();
-      if (!ip) {
-        showToast('Please enter your phone IP (e.g. 192.168.1.15)');
-        return;
-      }
-      localStorage.setItem('ludo_phone_ip', ip);
-      sendCommand({ action: "set_phone_ip", ip: ip });
-      const link = document.getElementById('direct-phone-link');
-      if (link) {
-        link.href = `http://${ip}:8088/`;
-        link.textContent = `http://${ip}:8088/`;
-      }
-      showToast(`Linked Phone: ${ip}`);
-    }
-
-    function showPhoneHelp() {
-      alert("HOW TO CONNECT YOUR PHONE:\n\n1. On your phone, go to Settings -> Wi-Fi -> details.\n2. Note your IP address (e.g. 192.168.1.15).\n3. Type it into the box above and tap 'Link Phone'.\n\nOR OPEN DIRECTLY:\nYou can also simply open http://<phone-ip>:8088/ directly in your PC browser — the game has a built-in remote web server!");
-    }
-
-    // Auto-restore saved phone IP
-    const savedIp = localStorage.getItem('ludo_phone_ip');
-    if (savedIp) {
-      setTimeout(() => {
-        const inp = document.getElementById('phone-ip-input');
-        const link = document.getElementById('direct-phone-link');
-        if (inp) inp.value = savedIp;
-        if (link) {
-          link.href = `http://${savedIp}:8088/`;
-          link.textContent = `http://${savedIp}:8088/`;
-        }
-      }, 500);
-    }
-
     function sendCommand(obj) {
       if (!mqttClient || !mqttClient.connected) {
         showToast('Connecting to PC bridge...');
@@ -872,6 +992,9 @@
     }
 
     function setDice(val) {
+      if (navigator.vibrate) {
+        try { navigator.vibrate(30); } catch(e){}
+      }
       updateDiceUI(val);
       pushToSupabase(val);
       
@@ -879,13 +1002,7 @@
         mqttClient.publish(`ludo/${roomCode}/cmd`, JSON.stringify({ action: "set_dice", val: val }));
       }
       
-      const phoneIp = (document.getElementById('phone-ip-input')?.value || localStorage.getItem('ludo_phone_ip') || "").trim();
-      if (phoneIp) {
-        try {
-          fetch(`http://${phoneIp}:8088/api/set_dice?val=${val}`, { mode: 'no-cors' }).catch(()=>{});
-        } catch(e){}
-      }
-      showToast(val === 0 ? '🎲 Dice set to RANDOM' : '🎯 Dice rigged to: ' + val + ' (Phone Synced!)');
+      showToast(val === 0 ? '🎲 Mode: Fair (Random)' : `🎯 Next Roll: ${val} (One-Shot)`);
     }
 
     function rollPlayer(name, x_r, y_r) {
