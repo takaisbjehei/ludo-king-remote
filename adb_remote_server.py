@@ -8,6 +8,7 @@ import base64
 import threading
 import urllib.request
 
+import socket
 import functools
 
 try:
@@ -30,7 +31,7 @@ TEMP_SCREEN_PATH = os.path.join(TEMP_DIR, "web_screen.png")
 CURRENT_FORCED_DICE = 0
 DEFAULT_ROOM = "LUDO88"
 ACTIVE_ROOMS = set([DEFAULT_ROOM])
-TARGET_PHONE_IP = None
+TARGET_PHONE_IP = "192.168.1.3"
 
 _screen_cache = {"time": 0, "b64": "", "bytes": b""}
 _screen_lock = threading.Lock()
@@ -106,22 +107,30 @@ def capture_screen_cached(max_age=0.25):
             print(f"[SCREEN ERROR] {e}")
         return "", b""
 
+def send_http_to_phone(ip, path):
+    def _run():
+        try:
+            s = socket.socket()
+            s.settimeout(0.6)
+            s.connect((ip, 8088))
+            s.sendall(f"GET {path} HTTP/1.1\r\nHost: {ip}:8088\r\nConnection: close\r\n\r\n".encode())
+            s.recv(512)
+            s.close()
+            print(f"[PHONE] Success: {path} -> {ip}:8088")
+        except Exception:
+            pass
+    threading.Thread(target=_run, daemon=True).start()
+
 def apply_set_dice(val):
     global CURRENT_FORCED_DICE
     CURRENT_FORCED_DICE = val
     dev = get_primary_device()
     if dev:
         run_adb(["-s", dev, "shell", "am", "broadcast", "-a", "com.vinaykpro.ludoking.SET_DICE", "--ei", "dice", str(val)])
-    try:
-        urllib.request.urlopen(f"http://localhost:8088/api/set_dice?val={val}", timeout=0.5)
-    except Exception:
-        pass
+    # Fast non-blocking send to physical phone over Wi-Fi
     if TARGET_PHONE_IP:
-        try:
-            urllib.request.urlopen(f"http://{TARGET_PHONE_IP}:8088/api/set_dice?val={val}", timeout=1.0)
-            print(f"[PHONE] Sent forced dice {val} to http://{TARGET_PHONE_IP}:8088")
-        except Exception as e:
-            print(f"[PHONE] Note: http://{TARGET_PHONE_IP}:8088 unreachable ({e})")
+        send_http_to_phone(TARGET_PHONE_IP, f"/api/set_dice?val={val}")
+    send_http_to_phone("127.0.0.1", f"/api/set_dice?val={val}")
     print(f"[DICE] Set forced dice to: {val} (0 = Random)")
 
 def apply_tap(x_ratio, y_ratio):

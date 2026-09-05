@@ -404,11 +404,11 @@
         <span style="font-size:10px; color:#8899a6; cursor:pointer;" onclick="showPhoneHelp()">ℹ️ How to find IP</span>
       </div>
       <div style="display:flex; gap:6px;">
-        <input type="text" id="phone-ip-input" placeholder="Phone IP (e.g. 192.168.1.15)" style="flex:1; background:#1b2434; border:1px solid #3b5379; color:#fff; padding:7px 10px; border-radius:8px; font-size:12px; font-weight:700; outline:none;">
+        <input type="text" id="phone-ip-input" value="192.168.1.3" placeholder="Phone IP (e.g. 192.168.1.3)" style="flex:1; background:#1b2434; border:1px solid #2ecc71; color:#fff; padding:7px 10px; border-radius:8px; font-size:12px; font-weight:700; outline:none;">
         <button onclick="linkPhoneIP()" style="background:#27ae60; border:none; color:#fff; font-weight:800; padding:7px 12px; border-radius:8px; font-size:11px; cursor:pointer;">Link Phone</button>
       </div>
-      <div id="phone-link-status" style="font-size:10px; color:#7f8c8d; margin-top:5px; line-height:1.3;">
-        Enter your phone's Wi-Fi IP if playing on your actual phone. Or open <a id="direct-phone-link" href="#" target="_blank" style="color:#f1c40f; text-decoration:underline;">http://[Phone-IP]:8088/</a> directly in browser!
+      <div id="phone-link-status" style="font-size:11px; color:#2ecc71; margin-top:5px; line-height:1.3;">
+        Phone connected: <a id="direct-phone-link" href="http://192.168.1.3:8088/" target="_blank" style="color:#f1c40f; font-weight:800; text-decoration:underline;">http://192.168.1.3:8088/</a> (Tap to open in-app remote directly!)
       </div>
     </div>
 
