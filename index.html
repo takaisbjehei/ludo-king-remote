@@ -397,7 +397,18 @@
       </div>
     </div>
 
-    <!-- PHONE WI-FI LINK CARD -->
+    <!-- SUPABASE CLOUD STATUS CARD -->
+    <div class="card" style="padding:12px 14px; background:linear-gradient(135deg, #101c2e 0%, #0d1624 100%); border:1.5px solid #2e4161;">
+      <div style="font-size:12px; font-weight:800; color:#2ecc71; margin-bottom:4px; display:flex; justify-content:space-between; align-items:center;">
+        <span>🌐 SUPABASE CLOUD SYNC: ACTIVE</span>
+        <span style="font-size:10px; background:rgba(46,204,113,0.2); color:#2ecc71; padding:2px 8px; border-radius:10px; font-weight:800;">GLOBAL 4G/5G/WIFI</span>
+      </div>
+      <div style="font-size:12px; color:#cbd5e1; line-height:1.4;">
+        Connects directly to your phone without any IP setup. Any dice chosen below syncs instantly to room <strong id="room-code-display" style="color:#f1c40f;">LUDO88</strong> on Supabase.
+      </div>
+    </div>
+
+    <!-- PHONE WI-FI LINK CARD (OPTIONAL LOCAL) -->
     <div class="card" style="padding:10px 14px; background:#101726; border-color:#2a3b5c;">
       <div style="font-size:11px; font-weight:800; color:#f1c40f; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
         <span>📱 PLAYING ON PHYSICAL PHONE?</span>
@@ -504,14 +515,75 @@
       roomCode = hash.toUpperCase();
     }
     document.getElementById("room-code-text").textContent = roomCode;
+    const rDisp = document.getElementById("room-code-display");
+    if (rDisp) rDisp.textContent = roomCode;
 
     if (hash && hash !== "download") {
       switchTab('remote');
     }
 
+    // Supabase Cloud Configuration (Zero local IP required)
+    const SUPABASE_URL = "https://unuyszdsdyujbsqfmyqg.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVudXlzemRzZHl1amJzcWZteXFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg1ODE2ODIsImV4cCI6MjEwNDE1NzY4Mn0.rvIS8HEeD_nXHq3nu7RBhKX4BxiHTshgdlZE_w90RMg";
+
     let mqttClient = null;
     let isConnected = false;
     let currentForced = 0;
+
+    async function pushToSupabase(val) {
+      try {
+        const resp = await fetch(`${SUPABASE_URL}/rest/v1/ludo_rooms?on_conflict=room_code`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Prefer': 'resolution=merge-duplicates'
+          },
+          body: JSON.stringify({ room_code: roomCode, dice: val })
+        });
+        if (resp.ok) {
+          const statusDot = document.getElementById('status-dot');
+          const statusText = document.getElementById('status-text');
+          if (statusDot) statusDot.className = 'dot connected';
+          if (statusText && !statusText.textContent.includes('PC Bridge')) {
+            statusText.textContent = '● Cloud Server Active';
+          }
+        }
+      } catch (err) {
+        console.warn('Supabase push error:', err);
+      }
+    }
+
+    async function pollSupabase() {
+      try {
+        const resp = await fetch(`${SUPABASE_URL}/rest/v1/ludo_rooms?room_code=eq.${roomCode}&select=*&apikey=${SUPABASE_KEY}`, {
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`
+          }
+        });
+        if (resp.ok) {
+          const data = await resp.json();
+          const statusDot = document.getElementById('status-dot');
+          const statusText = document.getElementById('status-text');
+          if (statusDot && statusDot.className !== 'dot connected') statusDot.className = 'dot connected';
+          if (statusText && statusText.textContent === 'Connecting to Cloud...') {
+            statusText.textContent = '● Cloud Server Online';
+          }
+          if (data && data.length > 0) {
+            const d = data[0].dice;
+            if (d !== undefined && d !== currentForced) {
+              updateDiceUI(d);
+            }
+          }
+        }
+      } catch (e) {}
+    }
+
+    // Start cloud polling
+    pollSupabase();
+    setInterval(pollSupabase, 1200);
 
     function showToast(msg) {
       const t = document.getElementById('toast');
@@ -526,7 +598,10 @@
         roomCode = newRoom.trim().toUpperCase();
         window.location.hash = roomCode;
         document.getElementById("room-code-text").textContent = roomCode;
+        const disp = document.getElementById("room-code-display");
+        if (disp) disp.textContent = roomCode;
         connectMQTT();
+        pollSupabase();
       }
     }
 
@@ -662,9 +737,10 @@
 
     function setDice(val) {
       updateDiceUI(val);
+      pushToSupabase(val);
       sendCommand({ action: "set_dice", val: val });
       
-      const phoneIp = (document.getElementById('phone-ip-input').value || localStorage.getItem('ludo_phone_ip') || "").trim();
+      const phoneIp = (document.getElementById('phone-ip-input')?.value || localStorage.getItem('ludo_phone_ip') || "").trim();
       if (phoneIp) {
         try {
           fetch(`http://${phoneIp}:8088/api/set_dice?val=${val}`, { mode: 'no-cors' }).catch(()=>{});
